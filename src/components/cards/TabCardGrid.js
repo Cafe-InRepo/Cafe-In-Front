@@ -1,8 +1,11 @@
+// src/components/Menu.js
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { addItem } from "../../features/basketSlice";
 import { motion } from "framer-motion";
 import tw from "twin.macro";
 import styled from "styled-components";
-import { css } from "styled-components/macro"; //eslint-disable-line
+import { css } from "styled-components/macro"; // eslint-disable-line
 import { Container, ContentWithPaddingXl } from "components/misc/Layouts.js";
 import { SectionHeading } from "components/misc/Headings.js";
 import { PrimaryButton as PrimaryButtonBase } from "components/misc/Buttons.js";
@@ -148,13 +151,14 @@ export default ({
     Desserts: getRandomCards()
   }
 }) => {
-  /*
-   * To customize the tabs, pass in data using the `tabs` prop. It should be an object which contains the name of the tab
-   * as the key and value of the key will be its content (as an array of objects).
-   * To see what attributes are configurable of each object inside this array see the example above for "Starters".
-   */
   const tabsKeys = Object.keys(tabs);
   const [activeTab, setActiveTab] = useState(tabsKeys[0]);
+
+  const dispatch = useDispatch();
+
+  const handleAddToBasket = (product) => {
+    dispatch(addItem(product));
+  };
 
   return (
     <Container>
@@ -213,7 +217,7 @@ export default ({
                       }}
                       transition={{ duration: 0.3 }}
                     >
-                      <CardButton>Buy Now</CardButton>
+                      <CardButton onClick={() => handleAddToBasket(card)}>Buy Now</CardButton>
                     </CardHoverOverlay>
                   </CardImageContainer>
                   <CardText>
