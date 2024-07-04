@@ -1,4 +1,3 @@
-// src/components/Menu.js
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { addItem } from "../../features/basketSlice";
@@ -23,16 +22,11 @@ const TabControl = styled.div`
     ${tw`bg-gray-300 text-gray-700`}
   }
   ${(props) => props.active && tw`bg-primary-500! text-gray-100!`}
-  }
 `;
 
-const TabContent = tw(
-  motion.div
-)`mt-6 flex flex-wrap sm:-mr-10 md:-mr-6 lg:-mr-12`;
+const TabContent = tw(motion.div)`mt-6 flex flex-wrap sm:-mr-10 md:-mr-6 lg:-mr-12`;
 const CardContainer = tw.div`mt-10 w-full sm:w-1/2 md:w-1/3 lg:w-1/4 sm:pr-10 md:pr-6 lg:pr-12`;
-const Card = tw(
-  motion.div
-)`bg-gray-200 rounded-b block max-w-xs mx-auto sm:max-w-none sm:mx-0`;
+const Card = tw(motion.div)`bg-gray-200 rounded-b block max-w-xs mx-auto sm:max-w-none sm:mx-0`;
 const CardImageContainer = styled.div`
   ${(props) =>
     css`
@@ -48,16 +42,12 @@ const CardRating = styled.div`
   }
 `;
 
-const CardHoverOverlay = styled(motion.div)`
-  background-color: rgba(255, 255, 255, 0.5);
-  ${tw`absolute inset-0 flex justify-center items-center`}
-`;
-const CardButton = tw(PrimaryButtonBase)`text-sm`;
+const CardButton = tw(PrimaryButtonBase)`text-sm mt-4 w-full`;
 
 const CardReview = tw.div`font-medium text-xs text-gray-600`;
 
 const CardText = tw.div`p-4 text-gray-900`;
-const CardTitle = tw.h5`text-lg font-semibold group-hover:text-primary-500`;
+const CardTitle = tw.h5`text-lg font-semibold`;
 const CardContent = tw.p`mt-1 text-sm font-medium text-gray-600`;
 const CardPrice = tw.p`mt-4 text-xl font-bold`;
 
@@ -214,13 +204,7 @@ export default ({
           >
             {tabs[tabKey].map((card, index) => (
               <CardContainer key={index}>
-                <Card
-                  className="group"
-                  href={card.url}
-                  initial="rest"
-                  whileHover="hover"
-                  animate="rest"
-                >
+                <Card className="group" href={card.url}>
                   <CardImageContainer imageSrc={card.imageSrc}>
                     <CardRatingContainer>
                       <CardRating>
@@ -229,28 +213,14 @@ export default ({
                       </CardRating>
                       <CardReview>({card.reviews})</CardReview>
                     </CardRatingContainer>
-                    <CardHoverOverlay
-                      variants={{
-                        hover: {
-                          opacity: 1,
-                          height: "auto",
-                        },
-                        rest: {
-                          opacity: 0,
-                          height: 0,
-                        },
-                      }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <CardButton onClick={() => handleAddToBasket(card)}>
-                        Buy Now
-                      </CardButton>
-                    </CardHoverOverlay>
                   </CardImageContainer>
                   <CardText>
                     <CardTitle>{card.title}</CardTitle>
                     <CardContent>{card.content}</CardContent>
                     <CardPrice>{card.price}</CardPrice>
+                    <CardButton onClick={() => handleAddToBasket(card)}>
+                      Buy Now
+                    </CardButton>
                   </CardText>
                 </Card>
               </CardContainer>
