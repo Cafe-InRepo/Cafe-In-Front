@@ -6,14 +6,12 @@ import { SectionHeading } from "components/misc/Headings";
 import { PrimaryButton as PrimaryButtonBase } from "components/misc/Buttons";
 import { Link } from "react-router-dom";
 import { ReactComponent as PriceIcon } from "feather-icons/dist/icons/dollar-sign.svg";
-import { ReactComponent as LocationIcon } from "feather-icons/dist/icons/map-pin.svg";
 import { ReactComponent as StarIcon } from "feather-icons/dist/icons/star.svg";
 import { ReactComponent as ChevronLeftIcon } from "feather-icons/dist/icons/chevron-left.svg";
 import { ReactComponent as ChevronRightIcon } from "feather-icons/dist/icons/chevron-right.svg";
 import { useSelector, useDispatch } from "react-redux";
 import {
   removeItem,
-  clearBasket,
   increaseQuantity,
   decreaseQuantity,
 } from "../../features/basketSlice";
@@ -121,10 +119,6 @@ export default () => {
 
   const handleDecreaseQuantity = (item) => {
     dispatch(decreaseQuantity(item));
-  };
-
-  const handleClearBasket = () => {
-    dispatch(clearBasket());
   };
 
   const handlePlaceOrder = () => {
