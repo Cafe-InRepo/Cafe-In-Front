@@ -39,7 +39,7 @@ const BasketIcon = () => {
   }
 
   const handleNavigation = () => {
-    navigate("/basket"); // Ensure this path is correct
+    navigate("/order"); // Ensure this path is correct
   };
 
   return (

@@ -4,6 +4,7 @@ import tw from "twin.macro";
 import styled from "styled-components";
 import { SectionHeading } from "components/misc/Headings";
 import { PrimaryButton as PrimaryButtonBase } from "components/misc/Buttons";
+import { Link } from "react-router-dom";
 import { ReactComponent as PriceIcon } from "feather-icons/dist/icons/dollar-sign.svg";
 import { ReactComponent as LocationIcon } from "feather-icons/dist/icons/map-pin.svg";
 import { ReactComponent as StarIcon } from "feather-icons/dist/icons/star.svg";
@@ -41,7 +42,7 @@ const CardSlider = styled(Slider)`
     ${tw`h-auto flex justify-center mb-1`}
   }
 `;
-const Card = tw.div`h-full flex! flex-col sm:border max-w-sm sm:rounded-tl-4xl sm:rounded-br-5xl relative focus:outline-none`;
+const Card = tw.div`h-full flex! flex-col sm:border w-full sm:max-w-sm sm:rounded-tl-4xl sm:rounded-br-5xl relative focus:outline-none`;
 const CardImage = styled.div((props) => [
   `background-image: url("${props.imageSrc}");`,
   tw`w-full h-56 sm:h-64 bg-cover bg-center rounded sm:rounded-none sm:rounded-tl-4xl`,
@@ -73,7 +74,7 @@ const Text = tw.div`ml-2 text-sm font-semibold text-gray-800`;
 
 const PrimaryButton = tw(
   PrimaryButtonBase
-)`mt-auto sm:text-lg rounded-none w-full rounded sm:rounded-none sm:rounded-br-4xl py-3 sm:py-6`;
+)`mt-auto sm:text-lg rounded-none w-full rounded bg-red-700 sm:rounded-none sm:rounded-br-4xl py-3 sm:py-6`;
 
 const QuantityContainer = styled.div`
   ${tw`absolute flex items-center bg-white border border-gray-300 rounded-full`}
@@ -88,6 +89,16 @@ const QuantityButton = styled.button`
 
 const Quantity = styled.p`
   ${tw`text-lg font-semibold text-gray-800 px-2`}
+`;
+
+const MessageContainer = tw.div`text-center py-16`;
+const Message = tw.p`text-lg`;
+const MenuLink = tw(Link)`text-primary-500`;
+
+const PlaceOrderButton = styled(PrimaryButtonBase)`
+  ${tw`mr-16 mt-8`}
+  right: 0;
+  bottom: 0;
 `;
 
 export default () => {
@@ -116,6 +127,10 @@ export default () => {
     dispatch(clearBasket());
   };
 
+  const handlePlaceOrder = () => {
+    alert("Order placed successfully!"); // Replace with actual order logic
+  };
+
   const determineSlidesToShow = () => {
     if (items.length === 1) return 1;
     if (items.length === 2) return 2;
@@ -141,6 +156,15 @@ export default () => {
       },
     ],
   };
+
+  if (items.length === 0) {
+    return (
+      <MessageContainer>
+        <Message>Please select some items from our menu.</Message>
+        <MenuLink to="/menu">Go to Menu</MenuLink>
+      </MessageContainer>
+    );
+  }
 
   return (
     <Container>
@@ -197,7 +221,9 @@ export default () => {
               </PrimaryButton>
             </Card>
           ))}
+
         </CardSlider>
+        <PlaceOrderButton onClick={handlePlaceOrder}>Place Order</PlaceOrderButton>
       </Content>
     </Container>
   );
