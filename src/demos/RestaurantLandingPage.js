@@ -10,7 +10,6 @@ import TabGrid from "components/cards/TabCardGrid.js";
 import Testimonial from "components/testimonials/ThreeColumnWithProfileImage.js";
 import DownloadApp from "components/cta/DownloadApp.js";
 import Footer from "components/footers/FiveColumnWithInputForm.js";
-import SliderCard from "components/cards/ThreeColSlider.js";
 
 import chefIconImageSrc from "images/chef-icon.svg";
 import celebrationIconImageSrc from "images/celebration-icon.svg";
