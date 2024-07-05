@@ -10,23 +10,22 @@ import { ReactComponent as StarIcon } from "feather-icons/dist/icons/star.svg";
 import { ReactComponent as ChevronLeftIcon } from "feather-icons/dist/icons/chevron-left.svg";
 import { ReactComponent as ChevronRightIcon } from "feather-icons/dist/icons/chevron-right.svg";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  removeItem,
-  increaseQuantity,
-  decreaseQuantity,
-} from "../../features/basketSlice";
+import { removeItem, increaseQuantity, decreaseQuantity } from "../../features/basketSlice";
+import { ReactComponent as ArrowRightIcon } from "feather-icons/dist/icons/arrow-right.svg"; // Import the arrow right icon
+import { ReactComponent as ArrowLeftIcon } from "feather-icons/dist/icons/arrow-left.svg"; // Import the arrow left icon
 
 const Container = styled.div`
   ${tw`relative`}
   width: 100%;
 `;
+
 const Content = styled.div`
   ${tw`max-w-screen-xl mx-auto py-16 lg:py-20`}
   width: 100%;
 `;
 
 const HeadingWithControl = tw.div`flex flex-col items-center sm:items-stretch sm:flex-row justify-between`;
-const Heading = tw(SectionHeading)``;
+const Heading = tw(SectionHeading)`mt-4`;
 const Controls = tw.div`flex items-center`;
 const ControlButton = styled(PrimaryButtonBase)`
   ${tw`mt-4 sm:mt-0 first:ml-0 ml-6 rounded-full p-2`}
@@ -62,7 +61,7 @@ const CardImage = styled.div((props) => [
   tw`w-full h-56 sm:h-64 bg-cover bg-center rounded sm:rounded-none rounded-tl-4xl sm:rounded-tl-4xl`,
 ]);
 
-const TextInfo = tw.div`py-6 px-16 sm:px-10 sm:py-6 w-full max-w-xs `; // Adjust 'max-w-xs' to your desired value
+const TextInfo = tw.div`py-6 px-16 sm:px-10 sm:py-6 w-full max-w-xs `;
 const TitleReviewContainer = styled.div`
   ${tw`flex flex-col sm:flex-row sm:justify-between sm:items-center w-full`}
 `;
@@ -112,10 +111,23 @@ const Message = tw.p`text-lg`;
 const MenuLink = tw(Link)`text-primary-500`;
 
 const PlaceOrderButton = styled(PrimaryButtonBase)`
-  ${tw`mr-16 mt-8`}
+  ${tw`mr-16 mt-8 flex items-center`}
   right: 0;
   bottom: 0;
-  position:absolute
+  position:absolute;
+  svg {
+    ${tw`ml-2 w-6 h-6`}
+  }
+`;
+
+const BackToMenuButton = styled(PrimaryButtonBase)`
+  ${tw`ml-16 mt-8 flex items-center`}
+  left: 0;
+  top: 0;
+  position:absolute;
+  svg {
+    ${tw`mr-2 w-6 h-6`}
+  }
 `;
 
 export default () => {
@@ -235,7 +247,14 @@ export default () => {
             </Card>
           ))}
         </CardSlider>
-        <PlaceOrderButton onClick={handlePlaceOrder}>Place Order</PlaceOrderButton>
+        <PlaceOrderButton onClick={handlePlaceOrder}>
+          Place Order
+          <ArrowRightIcon />
+        </PlaceOrderButton>
+        <BackToMenuButton as={Link} to="/menu">
+          <ArrowLeftIcon />
+          Back to Menu
+        </BackToMenuButton>
       </Content>
     </Container>
   );
