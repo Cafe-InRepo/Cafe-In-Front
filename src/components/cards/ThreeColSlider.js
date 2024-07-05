@@ -111,7 +111,7 @@ const Message = tw.p`text-lg`;
 const MenuLink = tw(Link)`text-primary-500`;
 
 const PlaceOrderButton = styled(PrimaryButtonBase)`
-  ${tw`mr-16 mt-8 flex items-center`}
+  ${tw`mr-8 mt-8 flex items-center`}
   right: 0;
   bottom: 0;
   position:absolute;
@@ -121,7 +121,7 @@ const PlaceOrderButton = styled(PrimaryButtonBase)`
 `;
 
 const BackToMenuButton = styled(PrimaryButtonBase)`
-  ${tw`ml-16 mt-8 flex items-center`}
+  ${tw`ml-8 mt-8 flex items-center`}
   left: 0;
   top: 0;
   position:absolute;
