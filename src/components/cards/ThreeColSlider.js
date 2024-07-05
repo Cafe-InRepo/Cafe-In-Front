@@ -121,7 +121,7 @@ const PlaceOrderButton = styled(PrimaryButtonBase)`
 `;
 
 const BackToMenuButton = styled(PrimaryButtonBase)`
-  ${tw`ml-8 mt-8 flex items-center`}
+  ${tw`ml-8 mt-8 mb-4 flex items-center`}
   left: 0;
   top: 0;
   position:absolute;
