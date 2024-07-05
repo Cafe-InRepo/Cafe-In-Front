@@ -77,7 +77,7 @@ export default ({
         id: 2,
         imageSrc:
           "https://images.unsplash.com/photo-1432139555190-58524dae6a55?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=80",
-        title: "Macaroni",
+        title: "Macaroni Macaroni Macaroni Macaroni",
         content: "Cheese Pizza",
         price: "$2.99",
         rating: "4.8",

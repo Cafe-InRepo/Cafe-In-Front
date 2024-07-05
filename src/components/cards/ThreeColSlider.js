@@ -16,8 +16,14 @@ import {
   decreaseQuantity,
 } from "../../features/basketSlice";
 
-const Container = tw.div`relative`;
-const Content = tw.div`max-w-screen-xl mx-auto py-16 lg:py-20`;
+const Container = styled.div`
+  ${tw`relative`}
+  width: 100%;
+`;
+const Content = styled.div`
+  ${tw`max-w-screen-xl mx-auto py-16 lg:py-20`}
+  width: 100%;
+`;
 
 const HeadingWithControl = tw.div`flex flex-col items-center sm:items-stretch sm:flex-row justify-between`;
 const Heading = tw(SectionHeading)``;
@@ -33,21 +39,35 @@ const NextButton = tw(ControlButton)``;
 
 const CardSlider = styled(Slider)`
   ${tw`mt-16`}
+  width: 100%;
   .slick-track {
     ${tw`flex`}
   }
   .slick-slide {
     ${tw`h-auto flex justify-center mb-1`}
   }
+  @media (max-width: 768px) {
+    ${tw`w-full`}
+    .slick-slide {
+      ${tw`w-full`}
+    }
+  }
 `;
-const Card = tw.div`h-full flex! flex-col sm:border w-full sm:max-w-sm sm:rounded-tl-4xl sm:rounded-br-5xl relative focus:outline-none`;
+const Card = styled.div`
+  ${tw`h-full flex! flex-col sm:border sm:max-w-sm sm:rounded-tl-4xl sm:rounded-br-5xl relative focus:outline-none`}
+  @media (max-width: 768px) {
+    ${tw`w-full`}
+  }
+`;
 const CardImage = styled.div((props) => [
   `background-image: url("${props.imageSrc}");`,
   tw`w-full h-56 sm:h-64 bg-cover bg-center rounded sm:rounded-none sm:rounded-tl-4xl`,
 ]);
 
-const TextInfo = tw.div`py-6 sm:px-10 sm:py-6`;
-const TitleReviewContainer = tw.div`flex flex-col sm:flex-row sm:justify-between sm:items-center`;
+const TextInfo = tw.div`py-6 px-16 sm:px-10 sm:py-6 w-full`;
+const TitleReviewContainer = styled.div`
+  ${tw`flex flex-col sm:flex-row sm:justify-between sm:items-center w-full`}
+`;
 const Title = tw.h5`text-2xl font-bold`;
 
 const RatingsInfo = styled.div`
@@ -58,9 +78,9 @@ const RatingsInfo = styled.div`
 `;
 const Rating = tw.span`ml-2 font-bold`;
 
-const Description = tw.p`text-sm leading-loose mt-2 sm:mt-4`;
+const Description = tw.p`text-sm leading-loose mt-2 sm:mt-4 w-full`;
 
-const SecondaryInfoContainer = tw.div`flex flex-col sm:flex-row mt-2 sm:mt-4`;
+const SecondaryInfoContainer = tw.div`flex flex-col sm:flex-row mt-2 sm:mt-4 w-full`;
 const IconWithText = tw.div`flex items-center mr-6 my-2 sm:my-0`;
 const IconContainer = styled.div`
   ${tw`inline-block rounded-full p-2 bg-gray-700 text-gray-100`}
@@ -143,7 +163,7 @@ export default () => {
         },
       },
       {
-        breakpoint: 900,
+        breakpoint: 768,
         settings: {
           slidesToShow: 1,
         },
@@ -215,7 +235,6 @@ export default () => {
               </PrimaryButton>
             </Card>
           ))}
-
         </CardSlider>
         <PlaceOrderButton onClick={handlePlaceOrder}>Place Order</PlaceOrderButton>
       </Content>
