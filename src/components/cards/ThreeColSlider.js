@@ -54,21 +54,19 @@ const CardSlider = styled(Slider)`
   }
 `;
 const Card = styled.div`
-  ${tw`h-full flex! flex-col sm:border sm:max-w-sm sm:rounded-tl-4xl sm:rounded-br-5xl relative focus:outline-none`}
-  @media (max-width: 768px) {
-    ${tw`w-full`}
-  }
+  ${tw`h-full flex! flex-col sm:border sm:max-w-sm sm:rounded-tl-4xl sm:rounded-br-5xl relative focus:outline-none border max-w-sm rounded-tl-4xl rounded-br-5xl`}
+  width: 100%;
 `;
 const CardImage = styled.div((props) => [
   `background-image: url("${props.imageSrc}");`,
-  tw`w-full h-56 sm:h-64 bg-cover bg-center rounded sm:rounded-none sm:rounded-tl-4xl`,
+  tw`w-full h-56 sm:h-64 bg-cover bg-center rounded sm:rounded-none rounded-tl-4xl sm:rounded-tl-4xl`,
 ]);
 
-const TextInfo = tw.div`py-6 px-16 sm:px-10 sm:py-6 w-full`;
+const TextInfo = tw.div`py-6 px-16 sm:px-10 sm:py-6 w-full max-w-xs `; // Adjust 'max-w-xs' to your desired value
 const TitleReviewContainer = styled.div`
   ${tw`flex flex-col sm:flex-row sm:justify-between sm:items-center w-full`}
 `;
-const Title = tw.h5`text-2xl font-bold`;
+const Title = tw.h5`text-xl font-bold`;
 
 const RatingsInfo = styled.div`
   ${tw`flex items-center sm:ml-4 mt-2 sm:mt-0`}
@@ -92,7 +90,7 @@ const Text = tw.div`ml-2 text-sm font-semibold text-gray-800`;
 
 const PrimaryButton = tw(
   PrimaryButtonBase
-)`mt-auto sm:text-lg rounded-none w-full rounded bg-red-700 sm:rounded-none sm:rounded-br-4xl py-3 sm:py-6`;
+)`mt-auto sm:text-lg rounded-none w-full rounded bg-red-700 sm:rounded-none sm:rounded-br-4xl rounded-br-4xl py-3 sm:py-6`;
 
 const QuantityContainer = styled.div`
   ${tw`absolute flex items-center bg-white border border-gray-300 rounded-full`}
@@ -117,6 +115,7 @@ const PlaceOrderButton = styled(PrimaryButtonBase)`
   ${tw`mr-16 mt-8`}
   right: 0;
   bottom: 0;
+  position:absolute
 `;
 
 export default () => {
