@@ -14,7 +14,6 @@ import Footer from "components/footers/FiveColumnWithInputForm.js";
 import chefIconImageSrc from "images/chef-icon.svg";
 import celebrationIconImageSrc from "images/celebration-icon.svg";
 import shopIconImageSrc from "images/shop-icon.svg";
-import BasketIcon from "components/features/BasketIcon";
 
 export default () => {
   const Subheading = tw.span`tracking-wider text-sm font-medium`;
@@ -24,7 +23,6 @@ export default () => {
   const imageCss = tw`rounded-4xl`;
   return (
     <AnimationRevealPage>
-      <BasketIcon />
       {/* TabGrid Component also accepts a tabs prop to customize the tabs and its content directly. Please open the TabGrid component file to see the structure of the tabs props.*/}
       <TabGrid
         heading={

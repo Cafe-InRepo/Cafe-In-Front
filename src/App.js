@@ -1,5 +1,7 @@
 import React from "react";
-import GlobalStyles from 'styles/GlobalStyles';
+import tw from "twin.macro";
+
+import GlobalStyles from "styles/GlobalStyles";
 import { css } from "styled-components/macro"; //eslint-disable-line
 
 /*
@@ -105,20 +107,39 @@ import MainLandingPage from "MainLandingPage.js";
 import ThankYouPage from "ThankYouPage.js";
 import SliderCard from "./components/cards/ThreeColSlider.js";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import TabGrid from "components/cards/TabCardGrid.js";
 
 export default function App() {
   // If you want to disable the animation just use the disabled `prop` like below on your page's component
   // return <AnimationRevealPage disabled>xxxxxxxxxx</AnimationRevealPage>;
-
+  const HighlightedText = tw.span`bg-primary-500 text-gray-100 px-4 transform -skew-x-12 inline-block`;
 
   return (
     <>
       <GlobalStyles />
       <Router>
         <Routes>
-          <Route path="/components/:type/:subtype/:name" element={<ComponentRenderer />} />
-          <Route path="/components/:type/:name" element={<ComponentRenderer />} />
+          <Route
+            path="/components/:type/:subtype/:name"
+            element={<ComponentRenderer />}
+          />
+          <Route
+            path="/components/:type/:name"
+            element={<ComponentRenderer />}
+          />
           <Route path="/order" element={<SliderCard />} />
+          <Route
+            path="/menu"
+            element={
+              <TabGrid
+                heading={
+                  <>
+                    Checkout our <HighlightedText>menu.</HighlightedText>
+                  </>
+                }
+              />
+            }
+          />
           <Route path="/thank-you" element={<ThankYouPage />} />
           <Route path="/" element={<MainLandingPage />} />
         </Routes>
