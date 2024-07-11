@@ -1,18 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Slider from "react-slick";
 import tw from "twin.macro";
 import styled from "styled-components";
+import { useParams, Link } from "react-router-dom";
 import { SectionHeading } from "components/misc/Headings";
 import { PrimaryButton as PrimaryButtonBase } from "components/misc/Buttons";
-import { Link } from "react-router-dom";
 import { ReactComponent as PriceIcon } from "feather-icons/dist/icons/dollar-sign.svg";
 import { ReactComponent as StarIcon } from "feather-icons/dist/icons/star.svg";
 import { ReactComponent as ChevronLeftIcon } from "feather-icons/dist/icons/chevron-left.svg";
 import { ReactComponent as ChevronRightIcon } from "feather-icons/dist/icons/chevron-right.svg";
 import { useSelector, useDispatch } from "react-redux";
-import { removeItem, increaseQuantity, decreaseQuantity } from "../../features/basketSlice";
+import {
+  removeItem,
+  increaseQuantity,
+  decreaseQuantity,
+  clearBasket,
+} from "../../features/basketSlice";
 import { ReactComponent as ArrowRightIcon } from "feather-icons/dist/icons/arrow-right.svg"; // Import the arrow right icon
 import { ReactComponent as ArrowLeftIcon } from "feather-icons/dist/icons/arrow-left.svg"; // Import the arrow left icon
+import { baseUrl } from "helpers/BaseUrl";
+import axios from "axios";
 
 const Container = styled.div`
   ${tw`relative`}
@@ -114,7 +121,7 @@ const PlaceOrderButton = styled(PrimaryButtonBase)`
   ${tw`mr-8 mt-8 flex items-center`}
   right: 0;
   bottom: 0;
-  position:absolute;
+  position: absolute;
   svg {
     ${tw`ml-2 w-6 h-6`}
   }
@@ -124,16 +131,41 @@ const BackToMenuButton = styled(PrimaryButtonBase)`
   ${tw`ml-8 mt-8 mb-4 flex items-center`}
   left: 0;
   top: 0;
-  position:absolute;
+  position: absolute;
   svg {
     ${tw`mr-2 w-6 h-6`}
   }
 `;
 
+const TotalPriceContainer = styled.div`
+  ${tw`flex justify-end items-center mt-8 mr-8`}
+  font-size: 1.25rem;
+  font-weight: bold;
+`;
+
 export default () => {
   const [sliderRef, setSliderRef] = useState(null);
+  const [order, setOrder] = useState(null);
   const items = useSelector((state) => state.basket.items);
   const dispatch = useDispatch();
+  const { orderId } = useParams();
+
+  useEffect(() => {
+    if (orderId) {
+      // Fetch the order from the server if orderId is present
+      const fetchOrder = async () => {
+        try {
+          const response = await axios.get(`${baseUrl}/order/${orderId}`);
+          if (response.status === 200) {
+            setOrder(response.data);
+          }
+        } catch (error) {
+          console.error("Error fetching order:", error);
+        }
+      };
+      fetchOrder();
+    }
+  }, [orderId, dispatch]);
 
   const handleRemoveFromBasket = (item) => {
     const isConfirmed = window.confirm(
@@ -152,8 +184,30 @@ export default () => {
     dispatch(decreaseQuantity(item));
   };
 
-  const handlePlaceOrder = () => {
-    alert("Order placed successfully!"); // Replace with actual order logic
+  const handlePlaceOrder = async () => {
+    const orderData = {
+      products: items.map((item) => item._id),
+      table: "668c61cde9b9312b5189b0b6", // Replace with actual table ID
+    };
+
+    try {
+      const response = await axios.post(`${baseUrl}/order`, orderData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.status === 201) {
+        const result = response.data;
+        console.log("Order placed successfully:", result);
+        dispatch(clearBasket());
+        // Optionally, navigate to a confirmation page or show a success message
+      } else {
+        console.error("Failed to place order:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error placing order:", error);
+    }
   };
 
   const determineSlidesToShow = () => {
@@ -182,7 +236,13 @@ export default () => {
     ],
   };
 
-  if (items.length === 0) {
+  const totalPrice = orderId
+    ? Number(order?.totalPrice)
+    : items.reduce((total, item) => total + item.price * item.quantity, 0);
+
+  const displayItems = orderId ? order?.products : items;
+
+  if (displayItems?.length === 0) {
     return (
       <MessageContainer>
         <Message>Please select some items from our menu.</Message>
@@ -206,9 +266,9 @@ export default () => {
           </Controls>
         </HeadingWithControl>
         <CardSlider ref={setSliderRef} {...sliderSettings}>
-          {items.map((item, index) => (
+          {displayItems?.map((item, index) => (
             <Card key={index}>
-              <CardImage imageSrc={item.imageSrc} />
+              <CardImage imageSrc={item.img} />
               <QuantityContainer style={{ top: 10, left: 10 }}>
                 <QuantityButton onClick={() => handleDecreaseQuantity(item)}>
                   -
@@ -220,23 +280,23 @@ export default () => {
               </QuantityContainer>
               <TextInfo>
                 <TitleReviewContainer>
-                  <Title>{item.title}</Title>
+                  <Title>{item.name}</Title>
                   <RatingsInfo>
                     <StarIcon />
                     <Rating>
-                      {item.rating} ({item.reviews})
+                      {item.rate} ({item.raters})
                     </Rating>
                   </RatingsInfo>
                 </TitleReviewContainer>
                 <SecondaryInfoContainer>
                   <IconWithText>
-                    <Text>{item.content}</Text>
+                    <Text>{item.description}</Text>
                   </IconWithText>
                   <IconWithText>
                     <IconContainer>
                       <PriceIcon />
                     </IconContainer>
-                    <Text>{item.price}</Text>
+                    <Text>${item.price}</Text>
                   </IconWithText>
                 </SecondaryInfoContainer>
                 <Description>{item.description}</Description>
@@ -247,8 +307,11 @@ export default () => {
             </Card>
           ))}
         </CardSlider>
+        <TotalPriceContainer>
+          Total Price: ${totalPrice.toFixed(2)}
+        </TotalPriceContainer>
         <PlaceOrderButton onClick={handlePlaceOrder}>
-          Place Order
+          {orderId ? "update the Order" : "Place the Order"}
           <ArrowRightIcon />
         </PlaceOrderButton>
         <BackToMenuButton as={Link} to="/menu">

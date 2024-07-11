@@ -9,7 +9,7 @@ const basketSlice = createSlice({
   initialState,
   reducers: {
     addItem: (state, action) => {
-      const existingItem = state.items.find(item => item.id === action.payload.id);
+      const existingItem = state.items.find(item => item._id === action.payload._id);
       if (existingItem) {
         existingItem.quantity += 1;
       } else {
@@ -17,23 +17,23 @@ const basketSlice = createSlice({
       }
     },
     removeItem: (state, action) => {
-      state.items = state.items.filter(item => item.id !== action.payload.id);
+      state.items = state.items.filter(item => item._id !== action.payload._id);
     },
     clearBasket: (state) => {
       state.items = [];
     },
     increaseQuantity: (state, action) => {
-      const item = state.items.find(item => item.id === action.payload.id);
+      const item = state.items.find(item => item._id === action.payload._id);
       if (item) {
         item.quantity += 1;
       }
     },
     decreaseQuantity: (state, action) => {
-      const item = state.items.find(item => item.id === action.payload.id);
+      const item = state.items.find(item => item._id === action.payload._id);
       if (item && item.quantity > 1) {
         item.quantity -= 1;
       } else {
-        state.items = state.items.filter(item => item.id !== action.payload.id);
+        state.items = state.items.filter(item => item._id !== action.payload._id);
       }
     },
   },

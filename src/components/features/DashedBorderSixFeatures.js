@@ -1,20 +1,15 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import tw from "twin.macro";
-//eslint-disable-next-line
-import { css } from "styled-components/macro";
 import { SectionHeading } from "components/misc/Headings.js";
-
-import defaultCardImage from "../../images/shield-icon.svg";
-
+import { PrimaryButton as PrimaryButtonBase } from "components/misc/Buttons.js";
 import { ReactComponent as SvgDecoratorBlob3 } from "../../images/svg-decorator-blob-3.svg";
-
-import SupportIconImage from "../../images/support-icon.svg";
-import ShieldIconImage from "../../images/shield-icon.svg";
-import CustomizeIconImage from "../../images/customize-icon.svg";
-import FastIconImage from "../../images/fast-icon.svg";
-import ReliableIconImage from "../../images/reliable-icon.svg";
-import SimpleIconImage from "../../images/simple-icon.svg";
+import { ReactComponent as CheckIcon } from "feather-icons/dist/icons/check-circle.svg"; // Import the check icon
+import { baseUrl } from "helpers/BaseUrl";
+import axios from "axios";
+import AnimationRevealPage from "helpers/AnimationRevealPage";
+import Nav from "components//hero/Nav.js";
 
 const Container = tw.div`relative`;
 
@@ -28,14 +23,7 @@ const Column = styled.div`
 `;
 
 const Card = styled.div`
-  ${tw`flex flex-col mx-auto max-w-xs items-center px-6 py-10 border-2 border-dashed border-primary-500 rounded-lg mt-12`}
-  .imageContainer {
-    ${tw`border-2 border-primary-500 text-center rounded-full p-6 flex-shrink-0 relative`}
-    img {
-      ${tw`w-8 h-8`}
-    }
-  }
-
+  ${tw`flex flex-col mx-auto max-w-xs items-center px-6 py-10 border-2 border-dashed border-primary-500 rounded-lg mt-12 relative`}
   .textContainer {
     ${tw`mt-6 text-center`}
   }
@@ -47,55 +35,116 @@ const Card = styled.div`
   .description {
     ${tw`mt-3 font-semibold text-secondary-100 text-sm leading-loose`}
   }
+
+  .productList {
+    ${tw`mt-3 text-sm`}
+  }
+`;
+
+const ButtonContainer = tw.div`mt-4 flex justify-between w-full`;
+
+const PrimaryButton = styled(PrimaryButtonBase)`
+  ${tw`text-sm w-full m-1`}
+  ${({ disabled }) => disabled && tw`bg-gray-300 cursor-not-allowed`}
+`;
+
+const CompletedIcon = styled(CheckIcon)`
+  ${tw` w-12 h-12 text-green-500`}
 `;
 
 const DecoratorBlob = styled(SvgDecoratorBlob3)`
   ${tw`pointer-events-none absolute right-0 bottom-0 w-64 opacity-25 transform translate-x-32 translate-y-48 `}
 `;
 
-export default () => {
-  /*
-   * This componets has an array of object denoting the cards defined below. Each object in the cards array can have the key (Change it according to your need, you can also add more objects to have more cards in this feature component):
-   *  1) imageSrc - the image shown at the top of the card
-   *  2) title - the title of the card
-   *  3) description - the description of the card
-   *  If a key for a particular card is not provided, a default value is used
-   */
+const OrderList = () => {
+  const [orders, setOrders] = useState([]);
+  const navigate = useNavigate();
 
-  const cards = [
-    {
-      imageSrc: ShieldIconImage,
-      title: "Ads Management",
-      description: "We create and manage ads that you need, from creation to deployment. Lorem ipsum donor sit amet consicou."
-    },
-    { imageSrc: SupportIconImage, title: "Video Marketing" },
-    { imageSrc: CustomizeIconImage, title: "Customer Relation" },
-    { imageSrc: ReliableIconImage, title: "Product Outreach" },
-    { imageSrc: FastIconImage, title: "PR Campaign" },
-    { imageSrc: SimpleIconImage, title: "Product Expansion" }
-  ];
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await axios.get(`${baseUrl}/order`);
+        setOrders(response.data);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
+  const handleModify = (orderId) => {
+    navigate(`/order/${orderId}`);
+  };
+
+  const handleCancel = async (orderId) => {
+    try {
+      await axios.delete(`${baseUrl}/orders/${orderId}`);
+      setOrders(orders.filter((order) => order._id !== orderId));
+    } catch (error) {
+      console.error("Error canceling order:", error);
+    }
+  };
+
+  const handleAddNewOrder = () => {
+    navigate("/menu");
+  };
 
   return (
-    <Container>
-      <ThreeColumnContainer>
-        <Heading>Our Professional <span tw="text-primary-500">Services</span></Heading>
-        {cards.map((card, i) => (
-          <Column key={i}>
-            <Card>
-              <span className="imageContainer">
-                <img src={card.imageSrc || defaultCardImage} alt="" />
-              </span>
+    <AnimationRevealPage>
+      <Container>
+        <Nav />
+        <ThreeColumnContainer>
+          <Heading>My Orders</Heading>
+          {orders.map((order, i) => (
+            <Column key={i}>
+              <Card>
+                {order.status === "completed" && <CompletedIcon />}
+                <span className="textContainer">
+                  <span className="title">Status: {order.status}</span>
+                  <div className="description">
+                    Total Price: <b> {order.totalPrice} TND</b>
+                  </div>
+                  <div className="productList">
+                    Products:
+                    <ul>
+                      {order.products.map((product, index) => (
+                        <li key={index}>
+                          {product.name} : {product.price} TND
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </span>
+                <ButtonContainer>
+                  <PrimaryButton
+                    onClick={() => handleModify(order._id)}
+                    disabled={order.status !== "pending"}
+                  >
+                    Modify
+                  </PrimaryButton>
+                  <PrimaryButton
+                    onClick={() => handleCancel(order._id)}
+                    disabled={order.status !== "pending"}
+                  >
+                    Cancel
+                  </PrimaryButton>
+                </ButtonContainer>
+              </Card>
+            </Column>
+          ))}
+          <Column>
+            <Card onClick={handleAddNewOrder}>
               <span className="textContainer">
-                <span className="title">{card.title || "Fully Secure"}</span>
-                <p className="description">
-                  {card.description || "Lorem ipsum donor amet siti ceali ut enim ad minim veniam, quis nostrud. Sic Semper Tyrannis. Neoas Calie artel."}
-                </p>
+                <span className="title">+ Add New Order</span>
               </span>
             </Card>
           </Column>
-        ))}
-      </ThreeColumnContainer>
-      <DecoratorBlob />
-    </Container>
+        </ThreeColumnContainer>
+        <DecoratorBlob />
+      </Container>
+    </AnimationRevealPage>
   );
 };
+
+export default OrderList;
