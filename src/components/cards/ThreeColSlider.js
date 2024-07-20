@@ -21,6 +21,7 @@ import { ReactComponent as ArrowLeftIcon } from "feather-icons/dist/icons/arrow-
 import { baseUrl } from "helpers/BaseUrl";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Loading from "helpers/Loading";
 
 const Container = styled.div`
   ${tw`relative`}
@@ -151,6 +152,7 @@ export default () => {
   const dispatch = useDispatch();
   const { orderId } = useParams();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (orderId) {
@@ -160,12 +162,16 @@ export default () => {
           const response = await axios.get(`${baseUrl}/order/${orderId}`);
           if (response.status === 200) {
             setOrder(response.data);
+            setIsLoading(false);
           }
         } catch (error) {
           console.error("Error fetching order:", error);
+          setIsLoading(false);
         }
       };
       fetchOrder();
+    } else {
+      setIsLoading(false);
     }
   }, [orderId, dispatch]);
 
@@ -204,12 +210,13 @@ export default () => {
         "Are you sure you want to remove this item?"
       );
       if (isConfirmed) {
-        dispatch(removeItem(item));
+        dispatch(removeItem(item.product));
       }
     }
   };
 
   const handleIncreaseQuantity = async (item) => {
+    setIsLoading(true);
     if (orderId) {
       try {
         const response = await axios.put(
@@ -224,20 +231,25 @@ export default () => {
 
         if (response.status === 200) {
           setOrder(response.data.order);
-          alert("Quantity increased");
+          //alert("Quantity increased");
+          setIsLoading(false);
         } else {
           alert("Failed to increase quantity");
+          setIsLoading(false);
         }
       } catch (error) {
         console.error("Error increasing quantity:", error);
         alert("Error increasing quantity");
+        setIsLoading(false);
       }
     } else {
-      dispatch(increaseQuantity(item));
+      dispatch(increaseQuantity(item.product));
+      setIsLoading(false);
     }
   };
 
   const handleDecreaseQuantity = async (item) => {
+    setIsLoading(true);
     if (orderId) {
       try {
         const response = await axios.put(
@@ -252,20 +264,25 @@ export default () => {
 
         if (response.status === 200) {
           setOrder(response.data.order);
-          alert("Quantity decreased");
+          setIsLoading(false);
+          //alert("Quantity decreased");
         } else {
+          setIsLoading(false);
           alert("Failed to decrease quantity");
         }
       } catch (error) {
         console.error("Error decreasing quantity:", error);
+        setIsLoading(false);
         alert("Error decreasing quantity");
       }
     } else {
-      dispatch(decreaseQuantity(item));
+      dispatch(decreaseQuantity(item.product));
+      setIsLoading(false);
     }
   };
 
   const handlePlaceOrder = async () => {
+    setIsLoading(true);
     const orderData = !orderId
       ? {
           products: items.map((item) => ({
@@ -303,18 +320,22 @@ export default () => {
       if (response.status === 200 || response.status === 201) {
         const result = response.data;
         console.log(message, result);
+        setIsLoading(false);
         if (!orderId) {
           dispatch(clearBasket());
         }
         // Optionally, navigate to a confirmation page or show a success message
-        alert(message);
+        //alert(message);
+        setIsLoading(false);
         navigate("/orders"); // Navigate to /orders
       } else {
         console.error("Failed to place order:", response.statusText);
+        setIsLoading(false);
         alert("Failed to place order");
       }
     } catch (error) {
       console.error("Error placing order:", error);
+      setIsLoading(false);
       alert("Error placing order");
     }
   };
@@ -361,6 +382,10 @@ export default () => {
         <MenuLink to="/menu">Go to Menu</MenuLink>
       </MessageContainer>
     );
+  }
+
+  if (isLoading) {
+    return <Loading />;
   }
 
   return (
