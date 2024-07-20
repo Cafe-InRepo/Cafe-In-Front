@@ -65,6 +65,7 @@ const OrderList = () => {
       try {
         const response = await axios.get(`${baseUrl}/order`);
         setOrders(response.data);
+        console.log(response.data);
       } catch (error) {
         console.error("Error fetching orders:", error);
       }
@@ -108,9 +109,9 @@ const OrderList = () => {
                   <div className="productList">
                     Products:
                     <ul>
-                      {order.products.map((product, index) => (
+                      {order.products.map(({ product, quantity }, index) => (
                         <li key={index}>
-                          {product.name} : {product.price} TND
+                          {product.name} : {product.price} TND (Qty: {quantity})
                         </li>
                       ))}
                     </ul>

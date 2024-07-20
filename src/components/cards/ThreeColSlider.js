@@ -16,10 +16,11 @@ import {
   decreaseQuantity,
   clearBasket,
 } from "../../features/basketSlice";
-import { ReactComponent as ArrowRightIcon } from "feather-icons/dist/icons/arrow-right.svg"; // Import the arrow right icon
-import { ReactComponent as ArrowLeftIcon } from "feather-icons/dist/icons/arrow-left.svg"; // Import the arrow left icon
+import { ReactComponent as ArrowRightIcon } from "feather-icons/dist/icons/arrow-right.svg";
+import { ReactComponent as ArrowLeftIcon } from "feather-icons/dist/icons/arrow-left.svg";
 import { baseUrl } from "helpers/BaseUrl";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Container = styled.div`
   ${tw`relative`}
@@ -60,7 +61,7 @@ const CardSlider = styled(Slider)`
   }
 `;
 const Card = styled.div`
-  ${tw`h-full flex! flex-col sm:border sm:max-w-sm sm:rounded-tl-4xl sm:rounded-br-5xl relative focus:outline-none border max-w-sm rounded-tl-4xl rounded-br-5xl`}
+  ${tw`h-full flex! flex-col sm:border sm:max-w-sm sm:rounded-tl-4xl sm:rounded-br-5xl relative focus:outline-none border max-w-sm rounded-tl-4xl rounded-br-4xl`}
   width: 100%;
 `;
 const CardImage = styled.div((props) => [
@@ -149,6 +150,7 @@ export default () => {
   const items = useSelector((state) => state.basket.items);
   const dispatch = useDispatch();
   const { orderId } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (orderId) {
@@ -167,46 +169,153 @@ export default () => {
     }
   }, [orderId, dispatch]);
 
-  const handleRemoveFromBasket = (item) => {
-    const isConfirmed = window.confirm(
-      "Are you sure you want to remove this item?"
-    );
-    if (isConfirmed) {
-      dispatch(removeItem(item));
+  const handleRemoveFromBasket = async (item) => {
+    if (orderId) {
+      // Handle removal from order
+      const updatedProducts = order.products.filter(
+        (product) => product.product._id !== item.product._id
+      );
+      const updatedOrder = { ...order, products: updatedProducts };
+
+      try {
+        const response = await axios.put(
+          `${baseUrl}/order/${orderId}`,
+          updatedOrder,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          setOrder(response.data);
+          alert("Item removed from order");
+        } else {
+          alert("Failed to remove item from order");
+        }
+      } catch (error) {
+        console.error("Error removing item from order:", error);
+        alert("Error removing item from order");
+      }
+    } else {
+      // Handle removal from basket slice
+      const isConfirmed = window.confirm(
+        "Are you sure you want to remove this item?"
+      );
+      if (isConfirmed) {
+        dispatch(removeItem(item));
+      }
     }
   };
 
-  const handleIncreaseQuantity = (item) => {
-    dispatch(increaseQuantity(item));
+  const handleIncreaseQuantity = async (item) => {
+    if (orderId) {
+      try {
+        const response = await axios.put(
+          `${baseUrl}/order/${orderId}/increase/${item.product._id}`,
+          {},
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          setOrder(response.data.order);
+          alert("Quantity increased");
+        } else {
+          alert("Failed to increase quantity");
+        }
+      } catch (error) {
+        console.error("Error increasing quantity:", error);
+        alert("Error increasing quantity");
+      }
+    } else {
+      dispatch(increaseQuantity(item));
+    }
   };
 
-  const handleDecreaseQuantity = (item) => {
-    dispatch(decreaseQuantity(item));
+  const handleDecreaseQuantity = async (item) => {
+    if (orderId) {
+      try {
+        const response = await axios.put(
+          `${baseUrl}/order/${orderId}/decrease/${item.product._id}`,
+          {},
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          setOrder(response.data.order);
+          alert("Quantity decreased");
+        } else {
+          alert("Failed to decrease quantity");
+        }
+      } catch (error) {
+        console.error("Error decreasing quantity:", error);
+        alert("Error decreasing quantity");
+      }
+    } else {
+      dispatch(decreaseQuantity(item));
+    }
   };
 
   const handlePlaceOrder = async () => {
-    const orderData = {
-      products: items.map((item) => item._id),
-      table: "668c61cde9b9312b5189b0b6", // Replace with actual table ID
-    };
+    const orderData = !orderId
+      ? {
+          products: items.map((item) => ({
+            product: item.product._id,
+            quantity: item.quantity,
+          })),
+          table: "669ae52606c579379345b7d2", // Replace with actual table ID
+        }
+      : {
+          products: order?.products,
+          table: "669ae52606c579379345b7d2",
+        };
 
     try {
-      const response = await axios.post(`${baseUrl}/order`, orderData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      let response;
+      let message;
+      if (orderId) {
+        // Update existing order
+        response = await axios.put(`${baseUrl}/order/${orderId}`, orderData, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        message = "Order updated successfully";
+      } else {
+        // Create new order
+        response = await axios.post(`${baseUrl}/order`, orderData, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        message = "Order placed successfully";
+      }
 
-      if (response.status === 201) {
+      if (response.status === 200 || response.status === 201) {
         const result = response.data;
-        console.log("Order placed successfully:", result);
-        dispatch(clearBasket());
+        console.log(message, result);
+        if (!orderId) {
+          dispatch(clearBasket());
+        }
         // Optionally, navigate to a confirmation page or show a success message
+        alert(message);
+        navigate("/orders"); // Navigate to /orders
       } else {
         console.error("Failed to place order:", response.statusText);
+        alert("Failed to place order");
       }
     } catch (error) {
       console.error("Error placing order:", error);
+      alert("Error placing order");
     }
   };
 
@@ -238,11 +347,14 @@ export default () => {
 
   const totalPrice = orderId
     ? Number(order?.totalPrice)
-    : items.reduce((total, item) => total + item.price * item.quantity, 0);
+    : items.reduce(
+        (total, item) => total + item.product.price * item.quantity,
+        0
+      );
 
   const displayItems = orderId ? order?.products : items;
 
-  if (displayItems?.length === 0) {
+  if (!displayItems || displayItems.length === 0) {
     return (
       <MessageContainer>
         <Message>Please select some items from our menu.</Message>
@@ -268,7 +380,7 @@ export default () => {
         <CardSlider ref={setSliderRef} {...sliderSettings}>
           {displayItems?.map((item, index) => (
             <Card key={index}>
-              <CardImage imageSrc={item.img} />
+              <CardImage imageSrc={item.product.img} />
               <QuantityContainer style={{ top: 10, left: 10 }}>
                 <QuantityButton onClick={() => handleDecreaseQuantity(item)}>
                   -
@@ -280,26 +392,26 @@ export default () => {
               </QuantityContainer>
               <TextInfo>
                 <TitleReviewContainer>
-                  <Title>{item.name}</Title>
+                  <Title>{item.product.name}</Title>
                   <RatingsInfo>
                     <StarIcon />
                     <Rating>
-                      {item.rate} ({item.raters})
+                      {item.product.rate} ({item.product.raters})
                     </Rating>
                   </RatingsInfo>
                 </TitleReviewContainer>
                 <SecondaryInfoContainer>
                   <IconWithText>
-                    <Text>{item.description}</Text>
+                    <Text>{item.product.description}</Text>
                   </IconWithText>
                   <IconWithText>
                     <IconContainer>
                       <PriceIcon />
                     </IconContainer>
-                    <Text>${item.price}</Text>
+                    <Text>${item.product.price}</Text>
                   </IconWithText>
                 </SecondaryInfoContainer>
-                <Description>{item.description}</Description>
+                <Description>{item.product.description}</Description>
               </TextInfo>
               <PrimaryButton onClick={() => handleRemoveFromBasket(item)}>
                 Remove
@@ -311,7 +423,7 @@ export default () => {
           Total Price: ${totalPrice.toFixed(2)}
         </TotalPriceContainer>
         <PlaceOrderButton onClick={handlePlaceOrder}>
-          {orderId ? "update the Order" : "Place the Order"}
+          {orderId ? "Update the Order" : "Place the Order"}
           <ArrowRightIcon />
         </PlaceOrderButton>
         <BackToMenuButton as={Link} to="/menu">
