@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import tw from "twin.macro";
-import { useSelector } from "react-redux";
 import { baseUrl } from "helpers/BaseUrl";
 import axios from "axios";
 import Loading from "helpers/Loading";
