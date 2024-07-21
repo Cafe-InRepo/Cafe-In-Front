@@ -5,7 +5,7 @@ import tw from "twin.macro";
 import { SectionHeading } from "components/misc/Headings.js";
 import { PrimaryButton as PrimaryButtonBase } from "components/misc/Buttons.js";
 import { ReactComponent as SvgDecoratorBlob3 } from "../../images/svg-decorator-blob-3.svg";
-import { ReactComponent as CheckIcon } from "feather-icons/dist/icons/check-circle.svg"; // Import the check icon
+import { ReactComponent as CheckIcon } from "feather-icons/dist/icons/check-circle.svg";
 import { baseUrl } from "helpers/BaseUrl";
 import axios from "axios";
 import AnimationRevealPage from "helpers/AnimationRevealPage";
@@ -80,11 +80,15 @@ const OrderList = () => {
 
   const handleCancel = async (orderId) => {
     try {
-      await axios.delete(`${baseUrl}/orders/${orderId}`);
+      await axios.delete(`${baseUrl}/order/${orderId}`);
       setOrders(orders.filter((order) => order._id !== orderId));
     } catch (error) {
       console.error("Error canceling order:", error);
     }
+  };
+
+  const handleRate = (orderId) => {
+    navigate(`/order/rate/${orderId}`);
   };
 
   const handleAddNewOrder = () => {
@@ -104,7 +108,7 @@ const OrderList = () => {
                 <span className="textContainer">
                   <span className="title">Status: {order.status}</span>
                   <div className="description">
-                    Total Price: <b> {order.totalPrice} TND</b>
+                    Total Price: <b> {order.totalPrice.toFixed(2)} TND</b>
                   </div>
                   <div className="productList">
                     Products:
@@ -118,18 +122,29 @@ const OrderList = () => {
                   </div>
                 </span>
                 <ButtonContainer>
-                  <PrimaryButton
-                    onClick={() => handleModify(order._id)}
-                    disabled={order.status !== "pending"}
-                  >
-                    Modify
-                  </PrimaryButton>
-                  <PrimaryButton
-                    onClick={() => handleCancel(order._id)}
-                    disabled={order.status !== "pending"}
-                  >
-                    Cancel
-                  </PrimaryButton>
+                  {order.status === "completed" ? (
+                    <PrimaryButton
+                      onClick={() => handleRate(order._id)}
+                      disabled={order.rated}
+                    >
+                      {order.rated ? "Rated" : "Rate"}
+                    </PrimaryButton>
+                  ) : (
+                    <>
+                      <PrimaryButton
+                        onClick={() => handleModify(order._id)}
+                        disabled={order.status !== "pending"}
+                      >
+                        Modify
+                      </PrimaryButton>
+                      <PrimaryButton
+                        onClick={() => handleCancel(order._id)}
+                        disabled={order.status !== "pending"}
+                      >
+                        Cancel
+                      </PrimaryButton>
+                    </>
+                  )}
                 </ButtonContainer>
               </Card>
             </Column>

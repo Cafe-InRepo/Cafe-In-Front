@@ -180,7 +180,7 @@ export default ({ heading = "Checkout the Menu" }) => {
                       <CardRatingContainer>
                         <CardRating>
                           <StarIcon />
-                          {card.rate}
+                          {Math.floor(card.rate)}
                         </CardRating>
                         <CardReview>({card.raters})</CardReview>
                       </CardRatingContainer>

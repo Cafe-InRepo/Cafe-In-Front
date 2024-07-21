@@ -109,6 +109,7 @@ import SliderCard from "./components/cards/ThreeColSlider.js";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import TabGrid from "components/cards/TabCardGrid.js";
 import Orders from "components/features/DashedBorderSixFeatures";
+import RatePage from "components/features/RatePage.js";
 
 export default function App() {
   // If you want to disable the animation just use the disabled `prop` like below on your page's component
@@ -130,6 +131,7 @@ export default function App() {
           />
           <Route path="/order/:orderId?" element={<SliderCard />} />{" "}
           <Route path="/orders" element={<Orders />} />{" "}
+          <Route path="/order/rate/:orderId" element={<RatePage />} />{" "}
           <Route
             path="/menu"
             element={
