@@ -15,7 +15,7 @@ import AnimationRevealPage from "helpers/AnimationRevealPage";
 import axios from "axios";
 import { baseUrl } from "helpers/BaseUrl";
 import Nav from "components/hero/Nav.js";
-
+import { GetToken } from "helpers/GetToken";
 
 const HeaderRow = tw.div`flex justify-between items-center flex-col xl:flex-row`;
 const Header = tw(SectionHeading)``;
@@ -104,11 +104,15 @@ export default ({ heading = "Checkout the Menu" }) => {
   const [tabsKeys, setTabsKeys] = useState([]);
   const [activeTab, setActiveTab] = useState("");
   const dispatch = useDispatch();
-
+  const token = GetToken();
   useEffect(() => {
-    const fetchMenu = async () => {
+    const fetchMenu = async (token) => {
       try {
-        const response = await axios.get(`${baseUrl}/menu`); // Replace with your API endpoint
+        const response = await axios.get(`${baseUrl}/menu`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         const menu = response.data;
 
         const categories = {};
@@ -124,8 +128,8 @@ export default ({ heading = "Checkout the Menu" }) => {
       }
     };
 
-    fetchMenu();
-  }, []);
+    fetchMenu(token);
+  }, [token]);
 
   const handleAddToBasket = (product) => {
     if (product.available) {
@@ -135,7 +139,7 @@ export default ({ heading = "Checkout the Menu" }) => {
 
   return (
     <AnimationRevealPage>
-    <Nav />
+      <Nav />
       <BasketIcon />
       <Container>
         <ContentWithPaddingXl>

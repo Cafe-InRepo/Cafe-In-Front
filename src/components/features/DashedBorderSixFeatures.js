@@ -10,6 +10,7 @@ import { baseUrl } from "helpers/BaseUrl";
 import axios from "axios";
 import AnimationRevealPage from "helpers/AnimationRevealPage";
 import Nav from "components//hero/Nav.js";
+import { GetToken } from "helpers/GetToken";
 
 const Container = tw.div`relative`;
 
@@ -59,11 +60,16 @@ const DecoratorBlob = styled(SvgDecoratorBlob3)`
 const OrderList = () => {
   const [orders, setOrders] = useState([]);
   const navigate = useNavigate();
+  const token = GetToken(); // Retrieve the token
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axios.get(`${baseUrl}/order`);
+        const response = await axios.get(`${baseUrl}/order`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setOrders(response.data);
         console.log(response.data);
       } catch (error) {
@@ -72,22 +78,31 @@ const OrderList = () => {
     };
 
     fetchOrders();
-  }, []);
+  }, [token]);
 
-  const handleModify = (orderId) => {
+  const handleModify = async (orderId) => {
     navigate(`/order/${orderId}`);
   };
 
   const handleCancel = async (orderId) => {
-    try {
-      await axios.delete(`${baseUrl}/order/${orderId}`);
-      setOrders(orders.filter((order) => order._id !== orderId));
-    } catch (error) {
-      console.error("Error canceling order:", error);
+    const confirm = window.confirm(
+      "are you sure you want to delet this order ?"
+    );
+    if (confirm) {
+      try {
+        await axios.delete(`${baseUrl}/order/${orderId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setOrders(orders.filter((order) => order._id !== orderId));
+      } catch (error) {
+        console.error("Error canceling order:", error);
+      }
     }
   };
 
-  const handleRate = (orderId) => {
+  const handleRate = async (orderId) => {
     navigate(`/order/rate/${orderId}`);
   };
 

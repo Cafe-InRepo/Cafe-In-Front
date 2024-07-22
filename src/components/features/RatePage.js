@@ -5,6 +5,7 @@ import tw from "twin.macro";
 import { baseUrl } from "helpers/BaseUrl";
 import axios from "axios";
 import Loading from "helpers/Loading";
+import { GetToken } from "helpers/GetToken";
 import { ReactComponent as StarIcon } from "feather-icons/dist/icons/star.svg";
 
 const Container = tw.div`relative min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8`;
@@ -28,11 +29,16 @@ const RatePage = () => {
   const [order, setOrder] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [ratings, setRatings] = useState({});
+  const token = GetToken(); // Retrieve the token
 
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const response = await axios.get(`${baseUrl}/order/${orderId}`);
+        const response = await axios.get(`${baseUrl}/order/${orderId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setOrder(response.data);
         setIsLoading(false);
       } catch (error) {
@@ -42,7 +48,7 @@ const RatePage = () => {
     };
 
     fetchOrder();
-  }, [orderId]);
+  }, [orderId, token]);
 
   const handleRating = (productId, rate) => {
     setRatings({
@@ -54,10 +60,24 @@ const RatePage = () => {
   const handleSubmit = async () => {
     setIsLoading(true);
     try {
-      await axios.post(`${baseUrl}/order/${orderId}/rate`, {
-        ratings,
-      });
-      await axios.put(`${baseUrl}/order/${orderId}`, { rated: true });
+      await axios.post(
+        `${baseUrl}/order/${orderId}/rate`,
+        { ratings },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      await axios.put(
+        `${baseUrl}/order/${orderId}`,
+        { rated: true },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       navigate("/orders");
     } catch (error) {
       console.error("Error submitting ratings:", error);

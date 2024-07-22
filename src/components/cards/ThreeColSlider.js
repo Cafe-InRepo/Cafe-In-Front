@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Slider from "react-slick";
 import tw from "twin.macro";
 import styled from "styled-components";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { SectionHeading } from "components/misc/Headings";
 import { PrimaryButton as PrimaryButtonBase } from "components/misc/Buttons";
 import { ReactComponent as PriceIcon } from "feather-icons/dist/icons/dollar-sign.svg";
@@ -20,8 +20,8 @@ import { ReactComponent as ArrowRightIcon } from "feather-icons/dist/icons/arrow
 import { ReactComponent as ArrowLeftIcon } from "feather-icons/dist/icons/arrow-left.svg";
 import { baseUrl } from "helpers/BaseUrl";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import Loading from "helpers/Loading";
+import { GetToken } from "helpers/GetToken";
 
 const Container = styled.div`
   ${tw`relative`}
@@ -153,30 +153,36 @@ export default () => {
   const { orderId } = useParams();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
+  const token = GetToken();
+
+  const fetchOrder = useCallback(async () => {
+    try {
+      const response = await axios.get(`${baseUrl}/order/${orderId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.status === 200) {
+        setOrder(response.data);
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error("Error fetching order:", error);
+      setIsLoading(false);
+    }
+  }, [orderId, token]);
 
   useEffect(() => {
     if (orderId) {
-      // Fetch the order from the server if orderId is present
-      const fetchOrder = async () => {
-        try {
-          const response = await axios.get(`${baseUrl}/order/${orderId}`);
-          if (response.status === 200) {
-            setOrder(response.data);
-            setIsLoading(false);
-          }
-        } catch (error) {
-          console.error("Error fetching order:", error);
-          setIsLoading(false);
-        }
-      };
       fetchOrder();
     } else {
       setIsLoading(false);
     }
-  }, [orderId, dispatch]);
+  }, [orderId, fetchOrder]);
 
   const handleRemoveFromBasket = async (item) => {
     if (orderId) {
+      setIsLoading(true);
       // Handle removal from order
       const updatedProducts = order.products.filter(
         (product) => product.product._id !== item.product._id
@@ -190,18 +196,22 @@ export default () => {
           {
             headers: {
               "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
             },
           }
         );
 
         if (response.status === 200) {
           setOrder(response.data);
-          alert("Item removed from order");
+          fetchOrder();
+          setIsLoading(false);
         } else {
+          setIsLoading(true);
           alert("Failed to remove item from order");
         }
       } catch (error) {
         console.error("Error removing item from order:", error);
+        setIsLoading(false);
         alert("Error removing item from order");
       }
     } else {
@@ -225,13 +235,13 @@ export default () => {
           {
             headers: {
               "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
             },
           }
         );
 
         if (response.status === 200) {
           setOrder(response.data.order);
-          //alert("Quantity increased");
           setIsLoading(false);
         } else {
           alert("Failed to increase quantity");
@@ -258,6 +268,7 @@ export default () => {
           {
             headers: {
               "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -265,7 +276,6 @@ export default () => {
         if (response.status === 200) {
           setOrder(response.data.order);
           setIsLoading(false);
-          //alert("Quantity decreased");
         } else {
           setIsLoading(false);
           alert("Failed to decrease quantity");
@@ -283,17 +293,16 @@ export default () => {
 
   const handlePlaceOrder = async () => {
     setIsLoading(true);
+
     const orderData = !orderId
       ? {
           products: items.map((item) => ({
             product: item.product._id,
             quantity: item.quantity,
           })),
-          table: "669ae52606c579379345b7d2", // Replace with actual table ID
         }
       : {
           products: order?.products,
-          table: "669ae52606c579379345b7d2",
         };
 
     try {
@@ -304,6 +313,7 @@ export default () => {
         response = await axios.put(`${baseUrl}/order/${orderId}`, orderData, {
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
         });
         message = "Order updated successfully";
@@ -312,6 +322,7 @@ export default () => {
         response = await axios.post(`${baseUrl}/order`, orderData, {
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
         });
         message = "Order placed successfully";
@@ -324,9 +335,6 @@ export default () => {
         if (!orderId) {
           dispatch(clearBasket());
         }
-        // Optionally, navigate to a confirmation page or show a success message
-        //alert(message);
-        setIsLoading(false);
         navigate("/orders"); // Navigate to /orders
       } else {
         console.error("Failed to place order:", response.statusText);
@@ -421,7 +429,7 @@ export default () => {
                   <RatingsInfo>
                     <StarIcon />
                     <Rating>
-                      {item.product.rate} ({item.product.raters})
+                      {Math.floor(item.product.rate)} ({item.product.raters})
                     </Rating>
                   </RatingsInfo>
                 </TitleReviewContainer>
