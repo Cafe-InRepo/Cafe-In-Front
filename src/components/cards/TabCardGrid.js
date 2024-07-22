@@ -16,6 +16,7 @@ import axios from "axios";
 import { baseUrl } from "helpers/BaseUrl";
 import Nav from "components/hero/Nav.js";
 import { GetToken } from "helpers/GetToken";
+import ErrorModal from "../../helpers/modals/ErrorModal";
 
 const HeaderRow = tw.div`flex justify-between items-center flex-col xl:flex-row`;
 const Header = tw(SectionHeading)``;
@@ -103,8 +104,12 @@ export default ({ heading = "Checkout the Menu" }) => {
   const [tabs, setTabs] = useState({});
   const [tabsKeys, setTabsKeys] = useState([]);
   const [activeTab, setActiveTab] = useState("");
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [confirmationMessage, setConfirmationMessage] = useState("");
   const dispatch = useDispatch();
   const token = GetToken();
+
   useEffect(() => {
     const fetchMenu = async (token) => {
       try {
@@ -125,6 +130,8 @@ export default ({ heading = "Checkout the Menu" }) => {
         setActiveTab(Object.keys(categories)[0]);
       } catch (error) {
         console.error("Error fetching menu:", error);
+        setErrorMessage("Error fetching menu. Please try again.");
+        setShowErrorModal(true);
       }
     };
 
@@ -134,6 +141,10 @@ export default ({ heading = "Checkout the Menu" }) => {
   const handleAddToBasket = (product) => {
     if (product.available) {
       dispatch(addItem(product));
+      setConfirmationMessage(`${product.name} has been added to your basket.`);
+    } else {
+      setErrorMessage("This product is currently unavailable.");
+      setShowErrorModal(true);
     }
   };
 
@@ -211,6 +222,14 @@ export default ({ heading = "Checkout the Menu" }) => {
         <DecoratorBlob1 />
         <DecoratorBlob2 />
       </Container>
+
+      {showErrorModal && (
+        <ErrorModal
+          message={errorMessage}
+          onClose={() => setShowErrorModal(false)}
+        />
+      )}
+
     </AnimationRevealPage>
   );
 };

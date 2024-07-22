@@ -11,6 +11,7 @@ import axios from "axios";
 import { baseUrl } from "helpers/BaseUrl";
 import Loading from "helpers/Loading";
 import { useNavigate } from "react-router-dom";
+import ErrorModal from "../helpers/modals/ErrorModal"; // Import your ErrorModal component
 
 const Container = tw(
   ContainerBase
@@ -41,7 +42,7 @@ const IllustrationImage = styled.div`
 `;
 const ErrorMessage = tw.p`mt-6 text-xs text-red-600 text-center`;
 
-export default ({
+const Login = ({
   logoLinkUrl = "#",
   illustrationImageSrc = illustration,
   headingText = "Sign In As Waiter",
@@ -54,6 +55,7 @@ export default ({
   const [tableNumber, setTableNumber] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showModal, setShowModal] = useState(false); // State to control modal display
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -74,18 +76,25 @@ export default ({
         navigate(`/menu`);
       } else {
         setError("Invalid credentials. Please try again.");
+        setShowModal(true); // Show modal on error
       }
     } catch (error) {
-      console.error("Error logging in:", error);
-      setError("An error occurred. Please try again.");
+      console.error("Error logging in:", error.response.data.msg);
+      setError(error.response.data.msg);
+      setShowModal(true); // Show modal on error
     } finally {
       setIsLoading(false);
     }
   };
 
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
   return (
     <AnimationRevealPage>
       <Container>
+        {showModal && <ErrorModal error={error} closeModal={closeModal} />} {/* Render modal if showModal is true */}
         <Content>
           <MainContainer>
             <LogoLink href={logoLinkUrl}>
@@ -127,7 +136,7 @@ export default ({
                     )}
                   </SubmitButton>
                 </Form>
-                {error && <ErrorMessage>{error}</ErrorMessage>}
+                <ErrorMessage>{error}</ErrorMessage> {/* Display error message inline */}
                 <p tw="mt-6 text-xs text-gray-600 text-center">
                   <a
                     href={forgotPasswordUrl}
@@ -147,3 +156,5 @@ export default ({
     </AnimationRevealPage>
   );
 };
+
+export default Login;
