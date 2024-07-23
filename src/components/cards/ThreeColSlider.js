@@ -25,7 +25,8 @@ import { GetToken } from "helpers/GetToken";
 
 const Container = styled.div`
   ${tw`relative`}
-  width: 100%;
+  max-width: 100%;
+  background-color: red;
 `;
 
 const Content = styled.div`
@@ -154,6 +155,7 @@ export default () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const token = GetToken();
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   const fetchOrder = useCallback(async () => {
     try {
@@ -348,15 +350,32 @@ export default () => {
     }
   };
 
+  const displayItems = orderId ? order?.products : items;
+
   const determineSlidesToShow = () => {
-    if (items.length === 1) return 1;
-    if (items.length === 2) return 2;
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) return 1;
+    if (displayItems?.length === 1) return 1;
+    if (displayItems?.length === 2) return 2;
     return 3;
   };
+  
 
   const sliderSettings = {
     arrows: false,
+    infinite: false,
     slidesToShow: determineSlidesToShow(),
+    afterChange: (current) => setCurrentSlide(current),
+    nextArrow: (
+      <NextButton disabled={currentSlide === displayItems?.length - 1}>
+        <ChevronRightIcon />
+      </NextButton>
+    ),
+    prevArrow: (
+      <PrevButton disabled={currentSlide === 0}>
+        <ChevronLeftIcon />
+      </PrevButton>
+    ),
     responsive: [
       {
         breakpoint: 1280,
@@ -381,8 +400,6 @@ export default () => {
         0
       );
 
-  const displayItems = orderId ? order?.products : items;
-
   if (!displayItems || displayItems.length === 0) {
     return (
       <MessageContainer>
@@ -402,10 +419,16 @@ export default () => {
         <HeadingWithControl>
           <Heading>My Order</Heading>
           <Controls>
-            <PrevButton onClick={sliderRef?.slickPrev}>
+            <PrevButton
+              onClick={sliderRef?.slickPrev}
+              disabled={currentSlide === 0}
+            >
               <ChevronLeftIcon />
             </PrevButton>
-            <NextButton onClick={sliderRef?.slickNext}>
+            <NextButton
+              onClick={sliderRef?.slickNext}
+              disabled={currentSlide === displayItems.length - 1}
+            >
               <ChevronRightIcon />
             </NextButton>
           </Controls>
