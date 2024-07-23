@@ -106,7 +106,6 @@ export default ({ heading = "Checkout the Menu" }) => {
   const [activeTab, setActiveTab] = useState("");
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [confirmationMessage, setConfirmationMessage] = useState("");
   const dispatch = useDispatch();
   const token = GetToken();
 
@@ -141,7 +140,6 @@ export default ({ heading = "Checkout the Menu" }) => {
   const handleAddToBasket = (product) => {
     if (product.available) {
       dispatch(addItem(product));
-      setConfirmationMessage(`${product.name} has been added to your basket.`);
     } else {
       setErrorMessage("This product is currently unavailable.");
       setShowErrorModal(true);
