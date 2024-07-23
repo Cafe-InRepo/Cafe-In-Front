@@ -25,8 +25,7 @@ import { GetToken } from "helpers/GetToken";
 
 const Container = styled.div`
   ${tw`relative`}
-  max-width: 100%;
-  background-color: red;
+  width: 100%;
 `;
 
 const Content = styled.div`
