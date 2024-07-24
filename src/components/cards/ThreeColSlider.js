@@ -5,7 +5,6 @@ import styled from "styled-components";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { SectionHeading } from "components/misc/Headings";
 import { PrimaryButton as PrimaryButtonBase } from "components/misc/Buttons";
-import { ReactComponent as PriceIcon } from "feather-icons/dist/icons/dollar-sign.svg";
 import { ReactComponent as StarIcon } from "feather-icons/dist/icons/star.svg";
 import { ReactComponent as ChevronLeftIcon } from "feather-icons/dist/icons/chevron-left.svg";
 import { ReactComponent as ChevronRightIcon } from "feather-icons/dist/icons/chevron-right.svg";
@@ -68,10 +67,10 @@ const Card = styled.div`
 `;
 const CardImage = styled.div((props) => [
   `background-image: url("${props.imageSrc}");`,
-  tw`w-full h-56 sm:h-64 bg-cover bg-center rounded sm:rounded-none rounded-tl-4xl sm:rounded-tl-4xl`,
+  tw`w-full min-w-[300px] h-56 sm:h-64 bg-cover bg-center rounded sm:rounded-none rounded-tl-4xl sm:rounded-tl-4xl`,
 ]);
 
-const TextInfo = tw.div`py-6 px-16 sm:px-10 sm:py-6 w-full max-w-xs `;
+const TextInfo = tw.div`py-6 px-4 sm:px-10 sm:py-6 w-full max-w-xs `;
 const TitleReviewContainer = styled.div`
   ${tw`flex flex-col sm:flex-row sm:justify-between sm:items-center w-full`}
 `;
@@ -87,15 +86,17 @@ const Rating = tw.span`ml-2 font-bold`;
 
 const Description = tw.p`text-sm leading-loose mt-2 sm:mt-4 w-full`;
 
-const SecondaryInfoContainer = tw.div`flex flex-col sm:flex-row mt-2 sm:mt-4 w-full`;
-const IconWithText = tw.div`flex items-center mr-6 my-2 sm:my-0`;
-const IconContainer = styled.div`
-  ${tw`inline-block rounded-full p-2 bg-gray-700 text-gray-100`}
-  svg {
-    ${tw`w-3 h-3`}
+const SecondaryInfoContainer = styled.div`
+  ${tw`flex flex-col sm:flex-row mt-2 sm:mt-4 w-full`}
+  justify-content: space-between;
+`;
+const IconWithText = styled.div`
+  ${tw`flex items-center mr-6 my-2 sm:my-0`}
+  ${tw`sm:justify-end`}
+  @media (max-width: 768px) {
+    ${tw`w-full justify-end`}
   }
 `;
-const Text = tw.div`ml-2 text-sm font-semibold text-gray-800`;
 
 const PrimaryButton = tw(
   PrimaryButtonBase
@@ -457,17 +458,11 @@ export default () => {
                     </RatingsInfo>
                   </TitleReviewContainer>
                   <SecondaryInfoContainer>
+                    <Description>{item.product.description}</Description>
                     <IconWithText>
-                      <Text>{item.product.description}</Text>
-                    </IconWithText>
-                    <IconWithText>
-                      <IconContainer>
-                        <PriceIcon />
-                      </IconContainer>
-                      <Text>${item.product.price}</Text>
+                      Price: {item.product.price} TND
                     </IconWithText>
                   </SecondaryInfoContainer>
-                  <Description>{item.product.description}</Description>
                 </TextInfo>
                 <PrimaryButton onClick={() => handleRemoveFromBasket(item)}>
                   Remove
