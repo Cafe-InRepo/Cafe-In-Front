@@ -22,6 +22,7 @@ import { baseUrl } from "helpers/BaseUrl";
 import axios from "axios";
 import Loading from "helpers/Loading";
 import { GetToken } from "helpers/GetToken";
+import AnimationRevealPage from "helpers/AnimationRevealPage";
 
 const Container = styled.div`
   ${tw`relative`}
@@ -358,7 +359,6 @@ export default () => {
     if (displayItems?.length === 2) return 2;
     return 3;
   };
-  
 
   const sliderSettings = {
     arrows: false,
@@ -413,79 +413,81 @@ export default () => {
   }
 
   return (
-    <Container>
-      <Content>
-        <HeadingWithControl>
-          <Heading>My Order</Heading>
-          <Controls>
-            <PrevButton
-              onClick={sliderRef?.slickPrev}
-              disabled={currentSlide === 0}
-            >
-              <ChevronLeftIcon />
-            </PrevButton>
-            <NextButton
-              onClick={sliderRef?.slickNext}
-              disabled={currentSlide === displayItems.length - 1}
-            >
-              <ChevronRightIcon />
-            </NextButton>
-          </Controls>
-        </HeadingWithControl>
-        <CardSlider ref={setSliderRef} {...sliderSettings}>
-          {displayItems?.map((item, index) => (
-            <Card key={index}>
-              <CardImage imageSrc={item.product.img} />
-              <QuantityContainer style={{ top: 10, left: 10 }}>
-                <QuantityButton onClick={() => handleDecreaseQuantity(item)}>
-                  -
-                </QuantityButton>
-                <Quantity>{item.quantity || 1}</Quantity>
-                <QuantityButton onClick={() => handleIncreaseQuantity(item)}>
-                  +
-                </QuantityButton>
-              </QuantityContainer>
-              <TextInfo>
-                <TitleReviewContainer>
-                  <Title>{item.product.name}</Title>
-                  <RatingsInfo>
-                    <StarIcon />
-                    <Rating>
-                      {Math.floor(item.product.rate)} ({item.product.raters})
-                    </Rating>
-                  </RatingsInfo>
-                </TitleReviewContainer>
-                <SecondaryInfoContainer>
-                  <IconWithText>
-                    <Text>{item.product.description}</Text>
-                  </IconWithText>
-                  <IconWithText>
-                    <IconContainer>
-                      <PriceIcon />
-                    </IconContainer>
-                    <Text>${item.product.price}</Text>
-                  </IconWithText>
-                </SecondaryInfoContainer>
-                <Description>{item.product.description}</Description>
-              </TextInfo>
-              <PrimaryButton onClick={() => handleRemoveFromBasket(item)}>
-                Remove
-              </PrimaryButton>
-            </Card>
-          ))}
-        </CardSlider>
-        <TotalPriceContainer>
-          Total Price: ${totalPrice.toFixed(2)}
-        </TotalPriceContainer>
-        <PlaceOrderButton onClick={handlePlaceOrder}>
-          {orderId ? "Update the Order" : "Place the Order"}
-          <ArrowRightIcon />
-        </PlaceOrderButton>
-        <BackToMenuButton as={Link} to="/menu">
-          <ArrowLeftIcon />
-          Back to Menu
-        </BackToMenuButton>
-      </Content>
-    </Container>
+    <AnimationRevealPage>
+      <Container>
+        <Content>
+          <HeadingWithControl>
+            <Heading>My Order</Heading>
+            <Controls>
+              <PrevButton
+                onClick={sliderRef?.slickPrev}
+                disabled={currentSlide === 0}
+              >
+                <ChevronLeftIcon />
+              </PrevButton>
+              <NextButton
+                onClick={sliderRef?.slickNext}
+                disabled={currentSlide === displayItems.length - 1}
+              >
+                <ChevronRightIcon />
+              </NextButton>
+            </Controls>
+          </HeadingWithControl>
+          <CardSlider ref={setSliderRef} {...sliderSettings}>
+            {displayItems?.map((item, index) => (
+              <Card key={index}>
+                <CardImage imageSrc={item.product.img} />
+                <QuantityContainer style={{ top: 10, left: 10 }}>
+                  <QuantityButton onClick={() => handleDecreaseQuantity(item)}>
+                    -
+                  </QuantityButton>
+                  <Quantity>{item.quantity || 1}</Quantity>
+                  <QuantityButton onClick={() => handleIncreaseQuantity(item)}>
+                    +
+                  </QuantityButton>
+                </QuantityContainer>
+                <TextInfo>
+                  <TitleReviewContainer>
+                    <Title>{item.product.name}</Title>
+                    <RatingsInfo>
+                      <StarIcon />
+                      <Rating>
+                        {Math.floor(item.product.rate)} ({item.product.raters})
+                      </Rating>
+                    </RatingsInfo>
+                  </TitleReviewContainer>
+                  <SecondaryInfoContainer>
+                    <IconWithText>
+                      <Text>{item.product.description}</Text>
+                    </IconWithText>
+                    <IconWithText>
+                      <IconContainer>
+                        <PriceIcon />
+                      </IconContainer>
+                      <Text>${item.product.price}</Text>
+                    </IconWithText>
+                  </SecondaryInfoContainer>
+                  <Description>{item.product.description}</Description>
+                </TextInfo>
+                <PrimaryButton onClick={() => handleRemoveFromBasket(item)}>
+                  Remove
+                </PrimaryButton>
+              </Card>
+            ))}
+          </CardSlider>
+          <TotalPriceContainer>
+            Total Price: ${totalPrice.toFixed(2)}
+          </TotalPriceContainer>
+          <PlaceOrderButton onClick={handlePlaceOrder}>
+            {orderId ? "Update the Order" : "Place the Order"}
+            <ArrowRightIcon />
+          </PlaceOrderButton>
+          <BackToMenuButton as={Link} to="/menu">
+            <ArrowLeftIcon />
+            Back to Menu
+          </BackToMenuButton>
+        </Content>
+      </Container>
+    </AnimationRevealPage>
   );
 };
