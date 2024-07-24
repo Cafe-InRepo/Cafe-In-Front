@@ -23,7 +23,7 @@ const IconContainer = styled.div`
 `;
 
 const LoadingText = styled(motion.div)`
-  ${tw`mt-4 text-lg font-semibold text-gray-700`}
+  ${tw`mt-4 text-lg font-semibold text-gray-700 text-center`}
 `;
 
 const trayVariants = {

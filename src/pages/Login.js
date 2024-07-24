@@ -90,11 +90,14 @@ const Login = ({
   const closeModal = () => {
     setShowModal(false);
   };
-
+  if (isLoading) {
+    return <Loading />;
+  }
   return (
     <AnimationRevealPage>
       <Container>
-        {showModal && <ErrorModal error={error} closeModal={closeModal} />} {/* Render modal if showModal is true */}
+        {showModal && <ErrorModal error={error} closeModal={closeModal} />}{" "}
+        {/* Render modal if showModal is true */}
         <Content>
           <MainContainer>
             <LogoLink href={logoLinkUrl}>
@@ -126,17 +129,14 @@ const Login = ({
                     required
                   />
                   <SubmitButton type="submit" disabled={isLoading}>
-                    {isLoading ? (
-                      <Loading />
-                    ) : (
-                      <>
-                        <SubmitButtonIcon className="icon" />
-                        <span className="text">{submitButtonText}</span>
-                      </>
-                    )}
+                    <>
+                      <SubmitButtonIcon className="icon" />
+                      <span className="text">{submitButtonText}</span>
+                    </>
                   </SubmitButton>
                 </Form>
-                <ErrorMessage>{error}</ErrorMessage> {/* Display error message inline */}
+                <ErrorMessage>{error}</ErrorMessage>{" "}
+                {/* Display error message inline */}
                 <p tw="mt-6 text-xs text-gray-600 text-center">
                   <a
                     href={forgotPasswordUrl}
