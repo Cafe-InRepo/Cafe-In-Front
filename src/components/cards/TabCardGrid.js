@@ -17,6 +17,7 @@ import { baseUrl } from "helpers/BaseUrl";
 import Nav from "components/hero/Nav.js";
 import { GetToken } from "helpers/GetToken";
 import ErrorModal from "../../helpers/modals/ErrorModal";
+import Loading from "helpers/Loading";
 
 const HeaderRow = tw.div`flex justify-between items-center flex-col xl:flex-row`;
 const Header = tw(SectionHeading)``;
@@ -105,6 +106,7 @@ export default ({ heading = "Checkout the Menu" }) => {
   const [tabsKeys, setTabsKeys] = useState([]);
   const [activeTab, setActiveTab] = useState("");
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const [isLodaing, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const dispatch = useDispatch();
   const token = GetToken();
@@ -127,10 +129,12 @@ export default ({ heading = "Checkout the Menu" }) => {
         setTabs(categories);
         setTabsKeys(Object.keys(categories));
         setActiveTab(Object.keys(categories)[0]);
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching menu:", error);
         setErrorMessage("Error fetching menu. Please try again.");
         setShowErrorModal(true);
+        setIsLoading(false);
       }
     };
 
@@ -145,6 +149,9 @@ export default ({ heading = "Checkout the Menu" }) => {
       setShowErrorModal(true);
     }
   };
+  if (isLodaing) {
+    return <Loading />;
+  }
 
   return (
     <AnimationRevealPage>
@@ -227,7 +234,6 @@ export default ({ heading = "Checkout the Menu" }) => {
           onClose={() => setShowErrorModal(false)}
         />
       )}
-
     </AnimationRevealPage>
   );
 };
