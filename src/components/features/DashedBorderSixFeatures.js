@@ -13,6 +13,7 @@ import Nav from "components//hero/Nav.js";
 import { GetToken } from "helpers/GetToken";
 import ConfirmationModal from "../../helpers/modals/ConfirmationModal"; // Import the ConfirmationModal component
 import ErrorModal from "../../helpers/modals/ErrorModal"; // Import the ErrorModal component
+import Loading from "helpers/Loading"; // Import the Loading component
 import { io } from "socket.io-client"; // Import the Socket.IO client
 
 const Container = tw.div`relative`;
@@ -66,6 +67,7 @@ const OrderList = () => {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [orderIdToDelete, setOrderIdToDelete] = useState(null);
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
   const navigate = useNavigate();
   const token = GetToken(); // Retrieve the token
 
@@ -78,11 +80,12 @@ const OrderList = () => {
           },
         });
         setOrders(response.data);
-        console.log(response.data);
+        setIsLoading(false); // Set loading to false when data is fetched
       } catch (error) {
         console.error("Error fetching orders:", error);
         setErrorMessage("Error fetching orders.");
         setShowErrorModal(true);
+        setIsLoading(false); // Set loading to false even if there is an error
       }
     };
 
@@ -137,6 +140,10 @@ const OrderList = () => {
   const handleAddNewOrder = () => {
     navigate("/menu");
   };
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <AnimationRevealPage>
