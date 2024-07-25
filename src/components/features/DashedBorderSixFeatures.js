@@ -13,6 +13,7 @@ import Nav from "components//hero/Nav.js";
 import { GetToken } from "helpers/GetToken";
 import ConfirmationModal from "../../helpers/modals/ConfirmationModal"; // Import the ConfirmationModal component
 import ErrorModal from "../../helpers/modals/ErrorModal"; // Import the ErrorModal component
+import { io } from "socket.io-client"; // Import the Socket.IO client
 
 const Container = tw.div`relative`;
 
@@ -86,6 +87,22 @@ const OrderList = () => {
     };
 
     fetchOrders();
+
+    const socket = io(baseUrl, {
+      auth: { token },
+    });
+
+    socket.on("orderUpdated", (updatedOrder) => {
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order._id === updatedOrder._id ? updatedOrder : order
+        )
+      );
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, [token]);
 
   const handleModify = async (orderId) => {
