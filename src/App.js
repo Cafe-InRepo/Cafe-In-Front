@@ -13,9 +13,10 @@ import PrivateRoute from "./components/privateRoute.js";
 import LoginPage from "./pages/Login";
 // import NotFoundPage from "./pages/NotFoundPage"; // Import the NotFoundPage component
 
-export default function App() {
-  const HighlightedText = tw.span`bg-primary-500 text-gray-100 px-4 transform -skew-x-12 inline-block`;
+// Move HighlightedText definition outside of the App component
+const HighlightedText = tw.span`bg-primary-500 text-gray-100 px-4 transform -skew-x-12 inline-block`;
 
+export default function App() {
   return (
     <>
       <GlobalStyles />
