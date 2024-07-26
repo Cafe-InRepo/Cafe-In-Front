@@ -7,6 +7,7 @@ import { changeLanguage } from "features/languageSlice";
 
 const SelectContainer = styled.div`
   ${tw`relative inline-block mr-6`}
+  
 `;
 
 const Select = styled.select`
@@ -16,6 +17,7 @@ const Select = styled.select`
   transition: all 0.2s ease-in-out;
   cursor: pointer;
   padding-right: 2.5rem; /* Space for the custom arrow */
+  width: 100%; /* Ensure it takes full width of container */
 
   &:focus {
     ${tw`border-primary-700`}
@@ -23,6 +25,18 @@ const Select = styled.select`
 
   &:hover {
     ${tw`border-primary-600`}
+  }
+
+  @media (max-width: 768px) {
+    ${tw`w-1/2`}/* 50% width on smaller screens */
+  }
+
+  @media (max-width: 640px) {
+    ${tw`w-3/4`}/* 75% width on extra small screens */
+  }
+
+  @media (max-width: 480px) {
+    ${tw`w-full`}/* 100% width on very small screens */
   }
 `;
 

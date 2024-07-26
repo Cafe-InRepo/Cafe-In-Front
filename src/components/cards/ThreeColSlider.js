@@ -68,7 +68,7 @@ const Card = styled.div`
 `;
 const CardImage = styled.div((props) => [
   `background-image: url("${props.imageSrc}");`,
-  tw`w-full min-w-[300px] h-56 sm:h-64 bg-cover bg-center rounded sm:rounded-none rounded-tl-4xl sm:rounded-tl-4xl`,
+  tw`w-full min-w-[270px] h-56 sm:h-64 bg-cover bg-center rounded sm:rounded-none rounded-tl-4xl sm:rounded-tl-4xl`,
 ]);
 
 const TextInfo = tw.div`py-6 px-4 sm:px-10 sm:py-6 w-full max-w-xs `;
