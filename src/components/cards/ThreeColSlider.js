@@ -421,7 +421,7 @@ export default () => {
       <Container>
         <Content>
           <HeadingWithControl>
-            <Heading>{Language.myOrders}</Heading>
+            <Heading>{Language.myOrder}</Heading>
             <Controls>
               <PrevButton
                 onClick={sliderRef?.slickPrev}

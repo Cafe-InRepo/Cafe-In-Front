@@ -2,6 +2,7 @@ const translations = {
   "English": {
     "menu": "menu",
     "myOrders": "My Orders",
+    "myOrder" : "My Order",
     "menuCheck": "Checkout our",
     "buy": "Buy now",
     "status": "status",
@@ -39,6 +40,7 @@ const translations = {
     "price": "Prix",
     "menu": "menu",
     "myOrders": "Mes commandes",
+    "myOrder" : "Ma Commande",
     "menuCheck": "consultez notre",
     "buy": "Achetez maintenant",
     "status": "statut",
@@ -75,6 +77,7 @@ const translations = {
     "price": "Prezzo",
     "menu": "menu",
     "myOrders": "I miei ordini",
+    "myOrder" : "Il mio ordine",
     "menuCheck": "scopri il nostro",
     "buy": "Acquista ora",
     "status": "stato",
