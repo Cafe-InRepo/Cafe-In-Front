@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addItem } from "../../features/basketSlice";
 import { motion } from "framer-motion";
 import tw from "twin.macro";
@@ -18,7 +18,7 @@ import Nav from "components/hero/Nav.js";
 import { GetToken } from "helpers/GetToken";
 import ErrorModal from "../../helpers/modals/ErrorModal";
 import Loading from "helpers/Loading";
-
+import translations from "app/language";
 const HeaderRow = tw.div`flex justify-between items-center flex-col xl:flex-row`;
 const Header = tw(SectionHeading)``;
 const TabsControl = tw.div`flex flex-wrap bg-gray-200 px-2 py-2 rounded leading-none mt-12 xl:mt-0`;
@@ -108,9 +108,10 @@ export default ({ heading = "Checkout the Menu" }) => {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [isLodaing, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const dispatch = useDispatch();
   const token = GetToken();
-
+  const dispatch = useDispatch();
+  const t = useSelector((state) => state.language.language);
+  const Language = translations[t];
   useEffect(() => {
     const fetchMenu = async (token) => {
       try {
@@ -208,14 +209,14 @@ export default ({ heading = "Checkout the Menu" }) => {
                     <CardText>
                       <CardTitle>{card.name}</CardTitle>
                       <CardContent>{card.description}</CardContent>
-                      <CardPrice>{card.price}</CardPrice>
+                      <CardPrice>{card.price} TND</CardPrice>
 
                       <CardButton
                         $isAvailable={card.available}
                         disabled={!card.available}
                         onClick={() => handleAddToBasket(card)}
                       >
-                        Buy Now
+                        {Language.buy}
                       </CardButton>
                     </CardText>
                   </Card>

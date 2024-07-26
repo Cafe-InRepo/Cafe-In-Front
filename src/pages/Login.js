@@ -12,6 +12,8 @@ import { baseUrl } from "helpers/BaseUrl";
 import Loading from "helpers/Loading";
 import { useNavigate } from "react-router-dom";
 import ErrorModal from "../helpers/modals/ErrorModal"; // Import your ErrorModal component
+import { useSelector } from "react-redux";
+import translations from "app/language";
 
 const Container = tw(
   ContainerBase
@@ -57,6 +59,8 @@ const Login = ({
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false); // State to control modal display
   const navigate = useNavigate();
+  const t = useSelector((state) => state.language.language);
+  const Language = translations[t];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -93,6 +97,7 @@ const Login = ({
   if (isLoading) {
     return <Loading />;
   }
+
   return (
     <AnimationRevealPage>
       <Container>
@@ -109,21 +114,21 @@ const Login = ({
                 <Form onSubmit={handleSubmit}>
                   <Input
                     type="email"
-                    placeholder="Waiter Email"
+                    placeholder={Language.email}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                   />
                   <Input
                     type="password"
-                    placeholder="Password"
+                    placeholder={Language.password}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />
                   <Input
                     type="text"
-                    placeholder="Table Number"
+                    placeholder={Language.tabnum}
                     value={tableNumber}
                     onChange={(e) => setTableNumber(e.target.value)}
                     required

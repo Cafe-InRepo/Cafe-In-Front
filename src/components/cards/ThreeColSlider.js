@@ -22,6 +22,7 @@ import axios from "axios";
 import Loading from "helpers/Loading";
 import { GetToken } from "helpers/GetToken";
 import AnimationRevealPage from "helpers/AnimationRevealPage";
+import translations from "app/language";
 
 const Container = styled.div`
   ${tw`relative`}
@@ -350,6 +351,8 @@ export default () => {
       alert("Error placing order");
     }
   };
+  const t = useSelector((state) => state.language.language);
+  const Language = translations[t];
 
   const displayItems = orderId ? order?.products : items;
 
@@ -403,8 +406,8 @@ export default () => {
   if (!displayItems || displayItems.length === 0) {
     return (
       <MessageContainer>
-        <Message>Please select some items from our menu.</Message>
-        <MenuLink to="/menu">Go to Menu</MenuLink>
+        <Message>{Language.pleaseSelectItems}</Message>
+        <MenuLink to="/menu">{Language.goToMenu}</MenuLink>
       </MessageContainer>
     );
   }
@@ -418,7 +421,7 @@ export default () => {
       <Container>
         <Content>
           <HeadingWithControl>
-            <Heading>My Order</Heading>
+            <Heading>{Language.myOrders}</Heading>
             <Controls>
               <PrevButton
                 onClick={sliderRef?.slickPrev}
@@ -460,18 +463,18 @@ export default () => {
                   <SecondaryInfoContainer>
                     <Description>{item.product.description}</Description>
                     <IconWithText>
-                      Price: {item.product.price} TND
+                      {Language.price}: {item.product.price} TND
                     </IconWithText>
                   </SecondaryInfoContainer>
                 </TextInfo>
                 <PrimaryButton onClick={() => handleRemoveFromBasket(item)}>
-                  Remove
+                  {Language.remove}
                 </PrimaryButton>
               </Card>
             ))}
           </CardSlider>
           <TotalPriceContainer>
-            Total Price: ${totalPrice.toFixed(2)}
+            {Language.totalPrice}: ${totalPrice.toFixed(2)}
           </TotalPriceContainer>
           <PlaceOrderButton onClick={handlePlaceOrder}>
             {orderId ? "Update the Order" : "Place the Order"}

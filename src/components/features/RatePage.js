@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import styled from "styled-components";
 import tw from "twin.macro";
 import { baseUrl } from "helpers/BaseUrl";
@@ -7,6 +7,8 @@ import axios from "axios";
 import Loading from "helpers/Loading";
 import { GetToken } from "helpers/GetToken";
 import { ReactComponent as StarIcon } from "feather-icons/dist/icons/star.svg";
+import translations from "app/language";
+import { useSelector } from "react-redux";
 
 const Container = tw.div`relative min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8`;
 const Card = tw.div`bg-white p-6 rounded-lg shadow-lg w-full max-w-sm text-center`;
@@ -16,7 +18,9 @@ const ProductItem = tw.li`flex flex-col items-start`;
 const ProductTitle = tw.h3`text-lg font-semibold`;
 const StarContainer = tw.div`flex items-center mt-2`;
 const SubmitButton = tw.button`mt-4 bg-primary-500 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition duration-300`;
-const OrdersLink = tw(Link)`mt-4 inline-block text-primary-500 hover:text-primary-700`;
+const OrdersLink = tw(
+  Link
+)`mt-4 inline-block text-primary-500 hover:text-primary-700`;
 
 const Star = styled(StarIcon)`
   ${tw`w-6 h-6 cursor-pointer transition duration-300`}
@@ -25,11 +29,13 @@ const Star = styled(StarIcon)`
 
 const RatePage = () => {
   const { orderId } = useParams();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [ratings, setRatings] = useState({});
   const token = GetToken(); // Retrieve the token
+  const t = useSelector((state) => state.language.language);
+  const Language = translations[t];
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -78,7 +84,7 @@ const RatePage = () => {
           },
         }
       );
-      navigate("/orders");
+      // navigate("/orders");
     } catch (error) {
       console.error("Error submitting ratings:", error);
       setIsLoading(false);
@@ -93,8 +99,8 @@ const RatePage = () => {
     return (
       <Container>
         <Card>
-          <Title>Thank you for rating!</Title>
-          <OrdersLink to="/orders">Go to My Orders</OrdersLink>
+          <Title>{Language.thankYouForRating}!</Title>
+          <OrdersLink to="/orders">{Language.goToMyOrders}</OrdersLink>
         </Card>
       </Container>
     );
@@ -103,7 +109,7 @@ const RatePage = () => {
   return (
     <Container>
       <Card>
-        <Title>Rate Your Products</Title>
+        <Title>{Language.rateYourProducts}</Title>
         <ProductList>
           {order.products.map(({ product }) => (
             <ProductItem key={product._id}>
@@ -120,7 +126,9 @@ const RatePage = () => {
             </ProductItem>
           ))}
         </ProductList>
-        <SubmitButton onClick={handleSubmit}>Submit Ratings</SubmitButton>
+        <SubmitButton onClick={handleSubmit}>
+          {Language.rateSubmit}
+        </SubmitButton>
       </Card>
     </Container>
   );

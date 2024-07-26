@@ -15,6 +15,8 @@ import ConfirmationModal from "../../helpers/modals/ConfirmationModal"; // Impor
 import ErrorModal from "../../helpers/modals/ErrorModal"; // Import the ErrorModal component
 import Loading from "helpers/Loading"; // Import the Loading component
 import { io } from "socket.io-client"; // Import the Socket.IO client
+import { useSelector } from "react-redux";
+import translations from "app/language";
 
 const Container = tw.div`relative`;
 
@@ -24,11 +26,11 @@ const ThreeColumnContainer = styled.div`
 const Heading = tw(SectionHeading)`w-full`;
 
 const Column = styled.div`
-  ${tw`md:w-1/2 lg:w-1/3 px-6 flex`}
+  ${tw`md:w-1/2 lg:w-1/3 flex`}
 `;
 
 const Card = styled.div`
-  ${tw`flex flex-col mx-auto max-w-xs items-center px-6 py-10 border-2 border-dashed border-primary-500 rounded-lg mt-12 relative`}
+  ${tw`flex flex-col mx-auto min-w-[300px] max-w-xs items-center px-6 py-10 border-2 border-dashed border-primary-500 rounded-lg mt-12 relative`}
   .textContainer {
     ${tw`mt-6 text-center`}
   }
@@ -140,6 +142,8 @@ const OrderList = () => {
   const handleAddNewOrder = () => {
     navigate("/menu");
   };
+  const t = useSelector((state) => state.language.language);
+  const Language = translations[t];
 
   if (isLoading) {
     return <Loading />;
@@ -163,18 +167,21 @@ const OrderList = () => {
           />
         )}
         <ThreeColumnContainer>
-          <Heading>My Orders</Heading>
+          <Heading>{Language.myOrders}</Heading>
           {orders.map((order, i) => (
             <Column key={i}>
               <Card>
                 {order.status === "completed" && <CompletedIcon />}
                 <span className="textContainer">
-                  <span className="title">Status: {order.status}</span>
+                  <span className="title">
+                    {Language.status}: {order.status}
+                  </span>
                   <div className="description">
-                    Total Price: <b> {order.totalPrice.toFixed(2)} TND</b>
+                    {Language.totalPrice}:{" "}
+                    <b> {order.totalPrice.toFixed(2)} TND</b>
                   </div>
                   <div className="productList">
-                    Products:
+                    {Language.Products}:
                     <ul>
                       {order.products.map(({ product, quantity }, index) => (
                         <li key={index}>
@@ -190,7 +197,7 @@ const OrderList = () => {
                       onClick={() => handleRate(order._id)}
                       disabled={order.rated}
                     >
-                      {order.rated ? "Rated" : "Rate"}
+                      {order.rated ? Language.rated : Language.rate}
                     </PrimaryButton>
                   ) : (
                     <>
@@ -198,13 +205,13 @@ const OrderList = () => {
                         onClick={() => handleModify(order._id)}
                         disabled={order.status !== "pending"}
                       >
-                        Modify
+                        {Language.modify}
                       </PrimaryButton>
                       <PrimaryButton
                         onClick={() => handleCancel(order._id)}
                         disabled={order.status !== "pending"}
                       >
-                        Cancel
+                        {Language.cancel}
                       </PrimaryButton>
                     </>
                   )}
@@ -215,7 +222,7 @@ const OrderList = () => {
           <Column>
             <Card onClick={handleAddNewOrder}>
               <span className="textContainer">
-                <span className="title">+ Add New Order</span>
+                <span className="title">+ {Language.newOrder}</span>
               </span>
             </Card>
           </Column>

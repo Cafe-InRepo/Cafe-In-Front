@@ -2,7 +2,12 @@ import React from "react";
 import tw from "twin.macro";
 import GlobalStyles from "styles/GlobalStyles";
 import { css } from "styled-components/macro"; //eslint-disable-line
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
 import ThankYouPage from "ThankYouPage.js";
 import SliderCard from "./components/cards/ThreeColSlider.js";
@@ -11,13 +16,16 @@ import Orders from "components/features/DashedBorderSixFeatures";
 import RatePage from "components/features/RatePage.js";
 import PrivateRoute from "./components/privateRoute.js";
 import LoginPage from "./pages/Login";
+import translations from "app/language.js";
+import { useSelector } from "react-redux";
 // import NotFoundPage from "./pages/NotFoundPage"; // Import the NotFoundPage component
 
 // Move HighlightedText definition outside of the App component
 const HighlightedText = tw.span`bg-primary-500 text-gray-100 px-4 transform -skew-x-12 inline-block`;
 
 export default function App() {
-  return (
+  const t = useSelector((state) => state.language.language);
+  const Language = translations[t];  return (
     <>
       <GlobalStyles />
       <Router>
@@ -53,7 +61,8 @@ export default function App() {
                 <TabGrid
                   heading={
                     <>
-                      Checkout our <HighlightedText>menu.</HighlightedText>
+                      {Language.menuCheck}{" "}
+                      <HighlightedText>{Language.menu}</HighlightedText>
                     </>
                   }
                 />
@@ -64,7 +73,8 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/" element={<Navigate to="/menu" />} />
           {/* <Route path="/404" element={<NotFoundPage />} /> */}
-          <Route path="*" element={<Navigate to="/404" />} /> {/* Catch-all route */}
+          <Route path="*" element={<Navigate to="/404" />} />{" "}
+          {/* Catch-all route */}
         </Routes>
       </Router>
     </>
