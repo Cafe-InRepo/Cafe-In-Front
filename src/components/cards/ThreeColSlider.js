@@ -9,12 +9,7 @@ import { ReactComponent as StarIcon } from "feather-icons/dist/icons/star.svg";
 import { ReactComponent as ChevronLeftIcon } from "feather-icons/dist/icons/chevron-left.svg";
 import { ReactComponent as ChevronRightIcon } from "feather-icons/dist/icons/chevron-right.svg";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  removeItem,
-  increaseQuantity,
-  decreaseQuantity,
-  clearBasket,
-} from "../../features/basketSlice";
+import { removeItem, clearBasket } from "../../features/basketSlice";
 import { ReactComponent as ArrowRightIcon } from "feather-icons/dist/icons/arrow-right.svg";
 import { ReactComponent as ArrowLeftIcon } from "feather-icons/dist/icons/arrow-left.svg";
 import { baseUrl } from "helpers/BaseUrl";
@@ -151,6 +146,7 @@ const TotalPriceContainer = styled.div`
 export default () => {
   const [sliderRef, setSliderRef] = useState(null);
   const [order, setOrder] = useState(null);
+  const [updatedQuantities, setUpdatedQuantities] = useState({});
   const items = useSelector((state) => state.basket.items);
   const dispatch = useDispatch();
   const { orderId } = useParams();
@@ -185,6 +181,11 @@ export default () => {
   }, [orderId, fetchOrder]);
 
   const handleRemoveFromBasket = async (item) => {
+    const isConfirmed = window.confirm(
+      "Are you sure you want to remove this item?"
+    );
+    if (!isConfirmed) return;
+
     if (orderId) {
       setIsLoading(true);
       // Handle removal from order
@@ -210,104 +211,52 @@ export default () => {
           fetchOrder();
           setIsLoading(false);
         } else {
-          setIsLoading(true);
           alert("Failed to remove item from order");
+          setIsLoading(false);
         }
       } catch (error) {
         console.error("Error removing item from order:", error);
-        setIsLoading(false);
         alert("Error removing item from order");
+        setIsLoading(false);
       }
     } else {
       // Handle removal from basket slice
-      const isConfirmed = window.confirm(
-        "Are you sure you want to remove this item?"
-      );
-      if (isConfirmed) {
-        dispatch(removeItem(item.product));
-      }
+      dispatch(removeItem(item.product));
     }
   };
 
-  const handleIncreaseQuantity = async (item) => {
-    setIsLoading(true);
-    if (orderId) {
-      try {
-        const response = await axios.put(
-          `${baseUrl}/order/${orderId}/increase/${item.product._id}`,
-          {},
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (response.status === 200) {
-          setOrder(response.data.order);
-          setIsLoading(false);
-        } else {
-          alert("Failed to increase quantity");
-          setIsLoading(false);
-        }
-      } catch (error) {
-        console.error("Error increasing quantity:", error);
-        alert("Error increasing quantity");
-        setIsLoading(false);
-      }
-    } else {
-      dispatch(increaseQuantity(item.product));
-      setIsLoading(false);
-    }
+  const handleIncreaseQuantity = (item) => {
+    setUpdatedQuantities((prevQuantities) => ({
+      ...prevQuantities,
+      [item.product._id]:
+        (prevQuantities[item.product._id] || item.quantity) + 1,
+    }));
   };
 
-  const handleDecreaseQuantity = async (item) => {
-    setIsLoading(true);
-    if (orderId) {
-      try {
-        const response = await axios.put(
-          `${baseUrl}/order/${orderId}/decrease/${item.product._id}`,
-          {},
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (response.status === 200) {
-          setOrder(response.data.order);
-          setIsLoading(false);
-        } else {
-          setIsLoading(false);
-          alert("Failed to decrease quantity");
-        }
-      } catch (error) {
-        console.error("Error decreasing quantity:", error);
-        setIsLoading(false);
-        alert("Error decreasing quantity");
-      }
-    } else {
-      dispatch(decreaseQuantity(item.product));
-      setIsLoading(false);
-    }
+  const handleDecreaseQuantity = (item) => {
+    setUpdatedQuantities((prevQuantities) => ({
+      ...prevQuantities,
+      [item.product._id]: Math.max(
+        (prevQuantities[item.product._id] || item.quantity) - 1,
+        1
+      ),
+    }));
   };
 
   const handlePlaceOrder = async () => {
     setIsLoading(true);
 
-    const orderData = !orderId
-      ? {
-          products: items.map((item) => ({
-            product: item.product._id,
-            quantity: item.quantity,
-          })),
-        }
-      : {
-          products: order?.products,
-        };
+    const products = !orderId
+      ? items.map((item) => ({
+          product: item.product._id,
+          quantity: updatedQuantities[item.product._id] || item.quantity,
+        }))
+      : order?.products.map((product) => ({
+          product: product.product._id,
+          quantity: updatedQuantities[product.product._id] || product.quantity,
+        }));
+
+    const orderData = { products };
 
     try {
       let response;
@@ -335,22 +284,22 @@ export default () => {
       if (response.status === 200 || response.status === 201) {
         const result = response.data;
         console.log(message, result);
-        setIsLoading(false);
         if (!orderId) {
           dispatch(clearBasket());
         }
         navigate("/orders"); // Navigate to /orders
       } else {
         console.error("Failed to place order:", response.statusText);
-        setIsLoading(false);
         alert("Failed to place order");
       }
     } catch (error) {
       console.error("Error placing order:", error);
-      setIsLoading(false);
       alert("Error placing order");
+    } finally {
+      setIsLoading(false);
     }
   };
+
   const t = useSelector((state) => state.language.language);
   const Language = translations[t];
 
@@ -399,7 +348,10 @@ export default () => {
   const totalPrice = orderId
     ? Number(order?.totalPrice)
     : items.reduce(
-        (total, item) => total + item.product.price * item.quantity,
+        (total, item) =>
+          total +
+          item.product.price *
+            (updatedQuantities[item.product._id] || item.quantity),
         0
       );
 
@@ -445,7 +397,9 @@ export default () => {
                   <QuantityButton onClick={() => handleDecreaseQuantity(item)}>
                     -
                   </QuantityButton>
-                  <Quantity>{item.quantity || 1}</Quantity>
+                  <Quantity>
+                    {updatedQuantities[item.product._id] || item.quantity}
+                  </Quantity>
                   <QuantityButton onClick={() => handleIncreaseQuantity(item)}>
                     +
                   </QuantityButton>
