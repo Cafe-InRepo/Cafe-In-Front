@@ -428,7 +428,7 @@ export default () => {
             ))}
           </CardSlider>
           <TotalPriceContainer>
-            {Language.totalPrice}: ${totalPrice.toFixed(2)}
+            {Language.totalPrice}: {totalPrice.toFixed(2)} TND
           </TotalPriceContainer>
           <PlaceOrderButton onClick={handlePlaceOrder}>
             {orderId ? "Update the Order" : "Place the Order"}
