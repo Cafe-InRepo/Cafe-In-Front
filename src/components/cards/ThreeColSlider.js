@@ -18,6 +18,7 @@ import Loading from "helpers/Loading";
 import { GetToken } from "helpers/GetToken";
 import AnimationRevealPage from "helpers/AnimationRevealPage";
 import translations from "app/language";
+import socket from "helpers/soket/socket";
 
 const Container = styled.div`
   ${tw`relative`}
@@ -284,6 +285,10 @@ export default () => {
       if (response.status === 200 || response.status === 201) {
         const result = response.data;
         console.log(message, result);
+
+        // Emit socket event
+        socket.emit("newOrder", { orderId: orderId || result._id });
+
         if (!orderId) {
           dispatch(clearBasket());
         }

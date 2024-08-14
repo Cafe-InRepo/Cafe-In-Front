@@ -84,7 +84,8 @@ const RatePage = () => {
           },
         }
       );
-      // navigate("/orders");
+      setIsLoading(false);
+      window.location.reload();
     } catch (error) {
       console.error("Error submitting ratings:", error);
       setIsLoading(false);

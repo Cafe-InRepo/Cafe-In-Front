@@ -78,9 +78,6 @@ const Login = ({
         // Handle successful login
         localStorage.setItem("tableToken", response.data.token);
         navigate(`/menu`);
-      } else {
-        setError("Invalid credentials. Please try again.");
-        setShowModal(true); // Show modal on error
       }
     } catch (error) {
       console.error("Error logging in:", error.response.data.msg);

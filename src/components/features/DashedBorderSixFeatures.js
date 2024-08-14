@@ -81,13 +81,19 @@ const OrderList = () => {
             Authorization: `Bearer ${token}`,
           },
         });
+
         setOrders(response.data);
         setIsLoading(false); // Set loading to false when data is fetched
       } catch (error) {
-        console.error("Error fetching orders:", error);
-        setErrorMessage("Error fetching orders.");
-        setShowErrorModal(true);
-        setIsLoading(false); // Set loading to false even if there is an error
+        if (error.response.status === 404) {
+          setOrders([]);
+          setIsLoading(false);
+        } else {
+          console.error("Error fetching orders:", error);
+          setErrorMessage("Error fetching orders.");
+          setShowErrorModal(true);
+          setIsLoading(false); // Set loading to false even if there is an error
+        }
       }
     };
 
@@ -97,12 +103,8 @@ const OrderList = () => {
       auth: { token },
     });
 
-    socket.on("orderUpdated", (updatedOrder) => {
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order._id === updatedOrder._id ? updatedOrder : order
-        )
-      );
+    socket.on("orderUpdated", () => {
+      fetchOrders();
     });
 
     return () => {
