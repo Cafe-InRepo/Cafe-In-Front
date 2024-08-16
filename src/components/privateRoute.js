@@ -9,13 +9,19 @@ const PrivateRoute = ({ children }) => {
     return <Navigate to="/login" />;
   }
 
-  // Decode the token to get its expiration time
-  const decodedToken = jwtDecode(token);
-  const currentTime = Date.now() / 1000;
+  try {
+    // Decode the token to get its expiration time
+    const decodedToken = jwtDecode(token);
+    const currentTime = Date.now() / 1000;
 
-  // Check if the token is expired
-  if (decodedToken.exp < currentTime) {
-    // Remove the expired token from local storage
+    // Check if the token is expired
+    if (decodedToken.expiresIn < currentTime) {
+      // Remove the expired token from local storage
+      localStorage.removeItem('tableToken');
+      return <Navigate to="/login" />;
+    }
+  } catch (error) {
+    // In case of any error during token decoding, remove the token and redirect to login
     localStorage.removeItem('tableToken');
     return <Navigate to="/login" />;
   }
