@@ -19,6 +19,7 @@ import { GetToken } from "helpers/GetToken";
 import ErrorModal from "../../helpers/modals/ErrorModal";
 import Loading from "helpers/Loading";
 import translations from "app/language";
+import { io } from "socket.io-client";
 const HeaderRow = tw.div`flex justify-between items-center flex-col xl:flex-col`;
 const Header = tw(SectionHeading)``;
 const TabsControl = tw.div`flex flex-wrap bg-gray-200 px-2 py-2 rounded leading-none mt-12 xl:mt-2`;
@@ -112,34 +113,44 @@ export default ({ heading = "Checkout the Menu" }) => {
   const dispatch = useDispatch();
   const t = useSelector((state) => state.language.language);
   const Language = translations[t];
+  const fetchMenu = async (token) => {
+    try {
+      const response = await axios.get(`${baseUrl}/menu`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const menu = response.data;
+
+      const categories = {};
+      menu.categories.forEach((category) => {
+        categories[category.name] = category.products;
+      });
+
+      setTabs(categories);
+      setTabsKeys(Object.keys(categories));
+      setActiveTab(Object.keys(categories)[0]);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching menu:", error);
+      setErrorMessage("Error fetching menu. Please try again.");
+      setShowErrorModal(true);
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchMenu = async (token) => {
-      try {
-        const response = await axios.get(`${baseUrl}/menu`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const menu = response.data;
-
-        const categories = {};
-        menu.categories.forEach((category) => {
-          categories[category.name] = category.products;
-        });
-
-        setTabs(categories);
-        setTabsKeys(Object.keys(categories));
-        setActiveTab(Object.keys(categories)[0]);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching menu:", error);
-        setErrorMessage("Error fetching menu. Please try again.");
-        setShowErrorModal(true);
-        setIsLoading(false);
-      }
-    };
-
     fetchMenu(token);
+    const socket = io(baseUrl, {
+      auth: { token },
+    });
+
+    socket.on("productUpdated", () => {
+      fetchMenu(token);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, [token]);
 
   const handleAddToBasket = (product) => {

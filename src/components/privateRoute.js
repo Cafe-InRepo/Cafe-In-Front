@@ -1,9 +1,9 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import {jwtDecode} from 'jwt-decode';
+import React from "react";
+import { Navigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 const PrivateRoute = ({ children }) => {
-  const token = localStorage.getItem('tableToken');
+  const token = localStorage.getItem("tableToken");
 
   if (!token) {
     return <Navigate to="/login" />;
@@ -15,14 +15,14 @@ const PrivateRoute = ({ children }) => {
     const currentTime = Date.now() / 1000;
 
     // Check if the token is expired
-    if (decodedToken.expiresIn < currentTime) {
+    if (decodedToken.exp < currentTime) {
       // Remove the expired token from local storage
-      localStorage.removeItem('tableToken');
+      localStorage.removeItem("tableToken");
       return <Navigate to="/login" />;
     }
   } catch (error) {
     // In case of any error during token decoding, remove the token and redirect to login
-    localStorage.removeItem('tableToken');
+    localStorage.removeItem("tableToken");
     return <Navigate to="/login" />;
   }
 
