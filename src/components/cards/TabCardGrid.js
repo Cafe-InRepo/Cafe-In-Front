@@ -20,6 +20,7 @@ import ErrorModal from "../../helpers/modals/ErrorModal";
 import Loading from "helpers/Loading";
 import translations from "app/language";
 import { io } from "socket.io-client";
+import NotifSupport from "components/features/NotificationSupport";
 const HeaderRow = tw.div`flex justify-between items-center flex-col xl:flex-col`;
 const Header = tw(SectionHeading)``;
 const TabsControl = tw.div`flex flex-wrap bg-gray-200 px-2 py-2 rounded leading-none mt-12 xl:mt-2`;
@@ -169,6 +170,7 @@ export default ({ heading = "Checkout the Menu" }) => {
     <AnimationRevealPage>
       <Nav />
       <BasketIcon />
+      <NotifSupport />
       <Container>
         <ContentWithPaddingXl>
           <HeaderRow>
