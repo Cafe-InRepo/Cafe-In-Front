@@ -1,24 +1,44 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import tw from "twin.macro";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { ReactComponent as BasketIconSvg } from "../../images/bill.svg"; // Ensure this path is correct
 import socket from "helpers/soket/socket";
 import { GetToken } from "helpers/GetToken";
-import { jwtDecode } from "jwt-decode"; // Import the jwt-decode library
+import {jwtDecode} from "jwt-decode"; // Import the jwt-decode library
+import { io } from "socket.io-client";
+import { baseUrl } from "helpers/BaseUrl";
 
+// Define a horizontal movement animation using keyframes
+const moveAnimation = keyframes`
+  0% { transform: translateX(0); }
+  50% { transform: translateX(10px); }
+  100% { transform: translateX(0); }
+`;
+
+// Style the icon container
 const IconContainer = styled.div`
   ${tw`fixed text-white p-4 rounded-full shadow-lg cursor-pointer bg-primary-500`}
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 50px; // Adjust size as needed
-  height: 50px; // Adjust size as needed
+  width: 50px;
+  height: 50px;
   left: 20px;
   top: 10%;
   z-index: 1;
+  transition: all 0.3s ease;
+
+  // Add the moving class animation when processing
+  &.processing {
+    animation: ${moveAnimation} 1s ease-in-out infinite;
+  }
 `;
 
+// Style the icon itself
+const StyledBasketIcon = styled(BasketIconSvg)``;
+
 const NotifSupport = () => {
+  const [isProcessing, setIsProcessing] = useState(false); // For tracking the call status
   const token = GetToken();
 
   // Decode the token and extract the tableNumber
@@ -26,7 +46,6 @@ const NotifSupport = () => {
   if (token) {
     try {
       const decodedToken = jwtDecode(token); // Decode the token
-      console.log(decodedToken);
       tableNumber = decodedToken.table.number; // Extract tableNumber from the decoded token
     } catch (error) {
       console.error("Failed to decode token:", error);
@@ -43,6 +62,7 @@ const NotifSupport = () => {
 
   const handleCallSupportClick = () => {
     if (tableNumber) {
+      setIsProcessing(true); // Start showing the animation
       console.log("calling from table", tableNumber);
       callForSupport(tableNumber);
     } else {
@@ -50,9 +70,33 @@ const NotifSupport = () => {
     }
   };
 
+  useEffect(() => {
+    const socket = io(baseUrl, { auth: { token } });
+    // Listen for call answered event
+    socket.on("callAnswered", (data) => {
+      if (data.tableNumber === tableNumber) {
+        handleCallAnswered(); // Stop processing and mark the call as answered
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [token, tableNumber]);
+
+  // Handle when the call is answered (could be triggered by a socket event or function call)
+  const handleCallAnswered = () => {
+    setIsProcessing(false); // Stop animation
+  };
+
   return (
-    <IconContainer onClick={handleCallSupportClick}>
-      <BasketIconSvg />
+    // Add or remove the 'processing' class based on the internal state
+    <IconContainer
+      onClick={handleCallSupportClick}
+      className={isProcessing ? "processing" : ""}
+    >
+      {/* Icon styled directly without passing isProcessing as a prop */}
+      <StyledBasketIcon />
     </IconContainer>
   );
 };
