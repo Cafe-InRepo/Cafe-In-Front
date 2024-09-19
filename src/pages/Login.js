@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AnimationRevealPage from "helpers/AnimationRevealPage.js";
 import { Container as ContainerBase } from "components/misc/Layouts";
 import tw from "twin.macro";
@@ -14,7 +14,8 @@ import { useNavigate } from "react-router-dom";
 import ErrorModal from "../helpers/modals/ErrorModal"; // Import your ErrorModal component
 import { useSelector } from "react-redux";
 import translations from "app/language";
-
+import { useLocation } from "react-router-dom";
+import { useCallback } from "react";
 const Container = tw(
   ContainerBase
 )`min-h-screen bg-primary-900 text-white font-medium flex justify-center -m-8`;
@@ -54,13 +55,54 @@ const Login = ({
 }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [tableNumber, setTableNumber] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false); // State to control modal display
   const navigate = useNavigate();
+  const location = useLocation(); // Hook to get URL params
   const t = useSelector((state) => state.language.language);
   const Language = translations[t];
+
+  // Handle QR code login based on token from URL
+
+  const handleQRLogin = useCallback(
+    async (token) => {
+      console.log(token);
+      setIsLoading(true);
+      setError("");
+
+      try {
+        const response = await axios.post(`${baseUrl}/auth/login-qr`, {
+          token, // Send only the token
+        });
+
+        if (response.status === 200) {
+          // Store the new token
+          localStorage.setItem("tableToken", response.data.token);
+          navigate(`/menu`);
+        }
+      } catch (error) {
+        console.error(
+          "Error logging in:",
+          error.response?.data?.msg || error.message
+        );
+        setError(error.response?.data?.msg || "Login failed");
+        setShowModal(true); // Show modal on error
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [navigate]
+  ); // useCallback ensures this function is memoized and won't change unless navigate changes
+
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    const token = query.get("token");
+
+    if (token) {
+      handleQRLogin(token); // Send only the token now
+    }
+  }, [location.search, handleQRLogin]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -71,17 +113,19 @@ const Login = ({
       const response = await axios.post(`${baseUrl}/auth/login-table`, {
         email,
         password,
-        tableNumber,
       });
 
       if (response.status === 200) {
-        // Handle successful login
+        // Store the new token
         localStorage.setItem("tableToken", response.data.token);
         navigate(`/menu`);
       }
     } catch (error) {
-      console.error("Error logging in:", error.response.data.msg);
-      setError(error.response.data.msg);
+      console.error(
+        "Error logging in:",
+        error.response?.data?.msg || error.message
+      );
+      setError(error.response?.data?.msg || "Login failed");
       setShowModal(true); // Show modal on error
     } finally {
       setIsLoading(false);
@@ -91,6 +135,7 @@ const Login = ({
   const closeModal = () => {
     setShowModal(false);
   };
+
   if (isLoading) {
     return <Loading />;
   }
@@ -99,7 +144,6 @@ const Login = ({
     <AnimationRevealPage>
       <Container>
         {showModal && <ErrorModal error={error} closeModal={closeModal} />}{" "}
-        {/* Render modal if showModal is true */}
         <Content>
           <MainContainer>
             <LogoLink href={logoLinkUrl}>
@@ -123,28 +167,18 @@ const Login = ({
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />
-                  <Input
-                    type="text"
-                    placeholder={Language.tabnum}
-                    value={tableNumber}
-                    onChange={(e) => setTableNumber(e.target.value)}
-                    required
-                  />
                   <SubmitButton type="submit" disabled={isLoading}>
-                    <>
-                      <SubmitButtonIcon className="icon" />
-                      <span className="text">{submitButtonText}</span>
-                    </>
+                    <SubmitButtonIcon className="icon" />
+                    <span className="text">{submitButtonText}</span>
                   </SubmitButton>
                 </Form>
                 <ErrorMessage>{error}</ErrorMessage>{" "}
-                {/* Display error message inline */}
                 <p tw="mt-6 text-xs text-gray-600 text-center">
                   <a
                     href={forgotPasswordUrl}
                     tw="border-b border-gray-500 border-dotted"
                   >
-                    Forgot Password ?
+                    Forgot Password?
                   </a>
                 </p>
               </FormContainer>
