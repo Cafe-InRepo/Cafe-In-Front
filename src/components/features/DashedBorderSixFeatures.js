@@ -187,7 +187,7 @@ const OrderList = () => {
                     <ul>
                       {order.products.map(({ product, quantity }, index) => (
                         <li key={index}>
-                          {product.name} : {product.price} TND (Qty: {quantity})
+                          {product?.name} : {product?.price} TND (Qty: {quantity})
                         </li>
                       ))}
                     </ul>
