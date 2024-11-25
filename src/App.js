@@ -18,6 +18,7 @@ import PrivateRoute from "./components/privateRoute.js";
 import LoginPage from "./pages/Login";
 import translations from "app/language.js";
 import { useSelector } from "react-redux";
+import SectionSelector from "components/SectionsBobbles.js/DisplaySections.js";
 // import NotFoundPage from "./pages/NotFoundPage"; // Import the NotFoundPage component
 
 // Move HighlightedText definition outside of the App component
@@ -25,7 +26,8 @@ const HighlightedText = tw.span`bg-primary-500 text-gray-100 px-4 transform -ske
 
 export default function App() {
   const t = useSelector((state) => state.language.language);
-  const Language = translations[t];  return (
+  const Language = translations[t];
+  return (
     <>
       <GlobalStyles />
       <Router>
@@ -56,6 +58,29 @@ export default function App() {
           />
           <Route
             path="/menu"
+            element={
+              <PrivateRoute>
+                {/* <TabGrid
+                  heading={
+                    <>
+                      {Language.menuCheck}{" "}
+                      <HighlightedText>{Language.menu}</HighlightedText>
+                    </>
+                  }
+                /> */}
+                <SectionSelector
+                  heading={
+                    <>
+                      Explore the
+                      <HighlightedText>Taste</HighlightedText>
+                    </>
+                  }
+                />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/categories/:categoryId"
             element={
               <PrivateRoute>
                 <TabGrid

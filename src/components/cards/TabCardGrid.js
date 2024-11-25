@@ -21,6 +21,7 @@ import Loading from "helpers/Loading";
 import translations from "app/language";
 import { io } from "socket.io-client";
 import NotifSupport from "components/features/NotificationSupport";
+import { useParams } from "react-router-dom";
 const HeaderRow = tw.div`flex justify-between items-center flex-col xl:flex-col`;
 const Header = tw(SectionHeading)``;
 const TabsControl = tw.div`flex flex-wrap bg-gray-200 px-2 py-2 rounded leading-none mt-12 xl:mt-2`;
@@ -111,23 +112,23 @@ export default ({ heading = "Checkout the Menu" }) => {
   const [isLodaing, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const token = GetToken();
+  const { categoryId } = useParams();
   const dispatch = useDispatch();
   const t = useSelector((state) => state.language.language);
   const Language = translations[t];
   const fetchMenu = async (token) => {
     try {
-      const response = await axios.get(`${baseUrl}/menu`, {
+      console.log(categoryId);
+      const response = await axios.get(`${baseUrl}/sections/${categoryId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       const menu = response.data;
-
       const categories = {};
       menu.categories.forEach((category) => {
         categories[category.name] = category.products;
       });
-
       setTabs(categories);
       setTabsKeys(Object.keys(categories));
       setActiveTab(Object.keys(categories)[0]);
