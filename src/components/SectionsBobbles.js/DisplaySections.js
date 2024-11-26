@@ -21,25 +21,25 @@ const GridWrapper = styled.div`
   justify-items: center;
 `;
 
-const Bubble = styled.div`
-  width: ${({ size }) => `${size}px`};
-  height: ${({ size }) => `${size}px`};
-  background-color: ${({ bgColor }) => bgColor};
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  font-weight: bold;
-  text-align: center;
-  cursor: pointer;
-  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+// const Bubble = styled.div`
+//   width: ${({ size }) => `${size}px`};
+//   height: ${({ size }) => `${size}px`};
+//   background-color: ${({ bgColor }) => bgColor};
+//   border-radius: 50%;
+//   display: flex;
+//   justify-content: center;
+//   align-items: center;
+//   color: white;
+//   font-weight: bold;
+//   text-align: center;
+//   cursor: pointer;
+//   transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 
-  &:hover {
-    transform: scale(1.2);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  }
-`;
+//   &:hover {
+//     transform: scale(1.2);
+//     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+//   }
+// `;
 const DecoratorBlob1 = styled(SvgDecoratorBlob1)`
   ${tw`pointer-events-none -z-20 absolute right-0 top-0 h-64 w-64 opacity-15 transform translate-x-2/3 -translate-y-12 text-pink-400`}
 `;
@@ -55,38 +55,38 @@ const SectionSelector = ({ heading }) => {
   const navigate = useNavigate();
   const token = GetToken();
 
-  const fetchSections = async () => {
-    try {
-      const response = await axios.get(`${baseUrl}/sections`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setSections(response.data);
-      setIsLoading(false);
-    } catch (err) {
-      setError("Failed to fetch sections. Please try again.");
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchSections = async () => {
+      try {
+        const response = await axios.get(`${baseUrl}/sections`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setSections(response.data);
+        setIsLoading(false);
+      } catch (err) {
+        setError("Failed to fetch sections. Please try again.");
+        setIsLoading(false);
+      }
+    };
+
     fetchSections();
-  }, []);
+  }, [token]); // Include 'token' as a dependency
 
   const handleSectionClick = (sectionId) => {
     navigate(`/categories/${sectionId}`);
   };
 
-  const getRandomColor = () => {
-    const colors = ["#6366F1", "#34D399", "#F87171", "#FBBF24", "#60A5FA"];
-    return colors[Math.floor(Math.random() * colors.length)];
-  };
+  // const getRandomColor = () => {
+  //   const colors = ["#6366F1", "#34D399", "#F87171", "#FBBF24", "#60A5FA"];
+  //   return colors[Math.floor(Math.random() * colors.length)];
+  // };
 
-  const getRandomSize = () => {
-    // Generate random sizes for the bubbles (range: 100px to 150px).
-    return Math.random() * 50 + 100;
-  };
+  // const getRandomSize = () => {
+  //   // Generate random sizes for the bubbles (range: 100px to 150px).
+  //   return Math.random() * 50 + 100;
+  // };
 
   if (isLoading) {
     return <Loading />;

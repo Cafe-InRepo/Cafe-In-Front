@@ -116,44 +116,44 @@ export default ({ heading = "Checkout the Menu" }) => {
   const dispatch = useDispatch();
   const t = useSelector((state) => state.language.language);
   const Language = translations[t];
-  const fetchMenu = async (token) => {
-    try {
-      console.log(categoryId);
-      const response = await axios.get(`${baseUrl}/sections/${categoryId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const menu = response.data;
-      const categories = {};
-      menu.categories.forEach((category) => {
-        categories[category.name] = category.products;
-      });
-      setTabs(categories);
-      setTabsKeys(Object.keys(categories));
-      setActiveTab(Object.keys(categories)[0]);
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Error fetching menu:", error);
-      setErrorMessage("Error fetching menu. Please try again.");
-      setShowErrorModal(true);
-      setIsLoading(false);
-    }
-  };
   useEffect(() => {
-    fetchMenu(token);
+    const fetchMenu = async () => {
+      try {
+        const response = await axios.get(`${baseUrl}/sections/${categoryId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const menu = response.data;
+        const categories = {};
+        menu.categories.forEach((category) => {
+          categories[category.name] = category.products;
+        });
+        setTabs(categories);
+        setTabsKeys(Object.keys(categories));
+        setActiveTab(Object.keys(categories)[0]);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching menu:", error);
+        setErrorMessage("Error fetching menu. Please try again.");
+        setShowErrorModal(true);
+        setIsLoading(false);
+      }
+    };
+
+    fetchMenu();
     const socket = io(baseUrl, {
       auth: { token },
     });
 
     socket.on("productUpdated", () => {
-      fetchMenu(token);
+      fetchMenu();
     });
 
     return () => {
       socket.disconnect();
     };
-  }, [token]);
+  }, [token,categoryId]);
 
   const handleAddToBasket = (product) => {
     if (product.available) {
