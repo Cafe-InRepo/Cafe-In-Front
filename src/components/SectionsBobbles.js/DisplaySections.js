@@ -19,6 +19,7 @@ const GridWrapper = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr); /* Two equal-width columns */
   justify-items: center;
+  paddingBottom :200px;
 `;
 
 // const Bubble = styled.div`
@@ -102,7 +103,7 @@ const SectionSelector = ({ heading }) => {
       <Container>
         <Header>{heading}</Header>
 
-        <GridWrapper style={{ marginTop: "5%" }}>
+        <GridWrapper style={{ marginBottom: "40%" }}>
           {/* {sections?.map((section, index) => (
             <Bubble
               key={index}

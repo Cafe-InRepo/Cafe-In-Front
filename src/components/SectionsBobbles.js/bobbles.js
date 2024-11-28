@@ -1,12 +1,19 @@
 import React, { useEffect, useState } from "react";
 import styled, { keyframes } from "styled-components";
 
+const ScrollableWrapper = styled.div`
+  width: 100vw;
+  height: 100vh;
+  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+`;
+
 const Container = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 20px;
-  width: 100vw;
-  height: ${({ number }) => (number > 6 ? "100vh" : "50vh")};
+  width: 100%;
+  padding: 20px; /* Optional: Add padding to avoid cutting off bubbles */
 `;
 
 const BubbleWrapper = styled.div`
@@ -73,21 +80,23 @@ const Bobbles = ({ sections, onBubbleClick }) => {
   }, [sections]);
 
   return (
-    <Container number={sections.lenght}>
-      {bubbles.map((bubble, index) => (
-        <BubbleWrapper key={bubble.id}>
-          <Bubble
-            size={bubble.size}
-            color={bubble.color}
-            duration={bubble.duration}
-            animationName={animations[index]}
-            onClick={() => onBubbleClick(bubble.id)}
-          >
-            {bubble.name}
-          </Bubble>
-        </BubbleWrapper>
-      ))}
-    </Container>
+    <ScrollableWrapper >
+      <Container>
+        {bubbles.map((bubble, index) => (
+          <BubbleWrapper key={bubble.id}>
+            <Bubble
+              size={bubble.size}
+              color={bubble.color}
+              duration={bubble.duration}
+              animationName={animations[index]}
+              onClick={() => onBubbleClick(bubble.id)}
+            >
+              {bubble.name}
+            </Bubble>
+          </BubbleWrapper>
+        ))}
+      </Container>
+    </ScrollableWrapper>
   );
 };
 
