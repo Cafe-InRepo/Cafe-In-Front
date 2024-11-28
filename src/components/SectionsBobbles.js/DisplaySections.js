@@ -103,7 +103,7 @@ const SectionSelector = ({ heading }) => {
       <Container>
         <Header>{heading}</Header>
 
-        <GridWrapper style={{ marginBottom: "40%" }}>
+        <GridWrapper style={{ marginBottom: "20%" }}>
           {/* {sections?.map((section, index) => (
             <Bubble
               key={index}
