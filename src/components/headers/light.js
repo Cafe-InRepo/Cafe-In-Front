@@ -6,7 +6,7 @@ import { css } from "styled-components/macro"; //eslint-disable-line
 
 import useAnimatedNavToggler from "../../helpers/useAnimatedNavToggler.js";
 
-import logo from "../../images/logo.svg";
+import logo from "../../images/SmallLogo.png";
 import { ReactComponent as MenuIcon } from "feather-icons/dist/icons/menu.svg";
 import { ReactComponent as CloseIcon } from "feather-icons/dist/icons/x.svg";
 import LanguageSelector from "helpers/LanguageSelector.js";
@@ -35,10 +35,10 @@ export const PrimaryLink = tw(NavLink)`
 `;
 
 export const LogoLink = styled(NavLink)`
-  ${tw`flex items-center font-black border-b-0 text-2xl! ml-0!`};
+  ${tw`flex items-center font-black border-b-0 text-xl! ml-0!`};
 
   img {
-    ${tw`w-10 mr-3`}
+    ${tw`w-12 h-10`}
   }
 `;
 
@@ -100,7 +100,7 @@ export default ({
     <>
       <LogoLink href="/">
         <img src={logo} alt="logo" />
-        Cafe'In
+        Order Craft
       </LogoLink>
       <LanguageSelector />
     </>

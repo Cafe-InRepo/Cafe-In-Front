@@ -27,6 +27,7 @@ const HighlightedText = tw.span`bg-primary-500 text-gray-100 px-4 transform -ske
 export default function App() {
   const t = useSelector((state) => state.language.language);
   const Language = translations[t];
+  const tableNumber = localStorage.getItem("tableNumber");
   return (
     <>
       <GlobalStyles />
@@ -71,8 +72,8 @@ export default function App() {
                 <SectionSelector
                   heading={
                     <>
-                      Explore the
-                      <HighlightedText>Taste</HighlightedText>
+                      {Language.tabnum}:
+                      <HighlightedText>{tableNumber}</HighlightedText>
                     </>
                   }
                 />

@@ -79,6 +79,7 @@ const Login = ({
         if (response.status === 200) {
           // Store the new token
           localStorage.setItem("tableToken", response.data.token);
+          localStorage.setItem("tableNumber", response.data.tableNumber);
           navigate(`/menu`);
         }
       } catch (error) {
