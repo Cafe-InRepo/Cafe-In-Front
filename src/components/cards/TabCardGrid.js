@@ -24,14 +24,40 @@ import NotifSupport from "components/features/NotificationSupport";
 import { useParams } from "react-router-dom";
 const HeaderRow = tw.div`flex justify-between items-center flex-col xl:flex-col`;
 const Header = tw(SectionHeading)``;
-const TabsControl = tw.div`flex flex-wrap bg-gray-200 px-2 py-2 rounded leading-none mt-12 xl:mt-2`;
+const TabsWrapper = styled.div`
+  ${tw`overflow-x-auto whitespace-nowrap`}
+`;
+
+const TabsControl = styled.div`
+  ${tw`inline-flex bg-gray-200 px-2 py-2 rounded leading-none mt-12 xl:mt-2`}
+`;
+// const TabsControl = styled.div`
+//   ${tw`flex bg-gray-200 px-2 py-2 rounded leading-none mt-12 xl:mt-2`}
+//   flex-wrap: nowrap; /* Prevent wrapping */
+//   overflow-x: auto; /* Enable horizontal scrolling */
+//   white-space: nowrap; /* Prevent tabs from wrapping */
+//   scrollbar-width: thin; /* Thin scrollbar for Firefox */
+//   -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
+
+//   &::-webkit-scrollbar {
+//     height: 4px; /* Set height for horizontal scrollbar */
+//   }
+//   &::-webkit-scrollbar-thumb {
+//     background: #c4c4c4; /* Customize scrollbar thumb color */
+//     border-radius: 8px; /* Rounded scrollbar */
+//   }
+//   &::-webkit-scrollbar-track {
+//     background: #f0f0f0; /* Customize scrollbar track color */
+//   }
+// `;
 
 const TabControl = styled.div`
-  ${tw`cursor-pointer px-6 py-3 mt-2 sm:mt-0 sm:mr-2 last:mr-0 text-gray-600 font-medium rounded-sm transition duration-300 text-sm sm:text-base w-1/2 sm:w-auto text-center`}
+  ${tw`cursor-pointer px-6 py-3 mt-2 sm:mt-0 sm:mr-2 last:mr-0 text-gray-600 font-medium rounded-sm transition duration-300 text-sm sm:text-base`}
   &:hover {
     ${tw`bg-gray-300 text-gray-700`}
   }
   ${(props) => props.active && tw`bg-primary-500! text-gray-100!`}
+  flex: 0 0 auto; /* Ensure tabs stay side by side */
 `;
 
 const TabContent = tw(
@@ -153,7 +179,7 @@ export default ({ heading = "Checkout the Menu" }) => {
     return () => {
       socket.disconnect();
     };
-  }, [token,categoryId]);
+  }, [token, categoryId]);
 
   const handleAddToBasket = (product) => {
     if (product.available) {
@@ -176,7 +202,8 @@ export default ({ heading = "Checkout the Menu" }) => {
         <ContentWithPaddingXl>
           <HeaderRow>
             <Header>{heading}</Header>
-
+          </HeaderRow>
+          <TabsWrapper>
             <TabsControl>
               {tabsKeys.map((tabName, index) => (
                 <TabControl
@@ -188,7 +215,7 @@ export default ({ heading = "Checkout the Menu" }) => {
                 </TabControl>
               ))}
             </TabsControl>
-          </HeaderRow>
+          </TabsWrapper>
 
           {tabsKeys.map((tabKey, index) => (
             <TabContent
