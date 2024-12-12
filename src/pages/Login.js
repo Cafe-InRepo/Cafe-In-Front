@@ -298,8 +298,8 @@ const Login = ({
 
         // Check distance
         const distance = calculateDistance(userLocation, {
-          lat: 36.8040255,
-          lon: 10.176862,
+          lat: 36.7880006,
+          lon: 10.1124222,
         });
         console.log(distance);
         prompt(distance);
