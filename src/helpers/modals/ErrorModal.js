@@ -10,7 +10,7 @@ const ModalCloseButton = tw.button`text-gray-600 hover:text-gray-800 focus:outli
 
 const ModalBody = tw.div`mt-4 text-sm text-gray-700`;
 
-const ErrorModal = ({ error, closeModal }) => {
+const ErrorModal = ({ error, closeModal, retryAction }) => {
   return (
     <ModalOverlay>
       <ModalContainer>
@@ -20,7 +20,11 @@ const ErrorModal = ({ error, closeModal }) => {
             <CloseIcon />
           </ModalCloseButton>
         </ModalHeader>
-        <ModalBody>{error}</ModalBody>
+        <ModalBody>
+          {error}
+
+          {retryAction && <button onClick={retryAction}>Retry</button>}
+        </ModalBody>
       </ModalContainer>
     </ModalOverlay>
   );
