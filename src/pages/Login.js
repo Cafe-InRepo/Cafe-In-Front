@@ -299,6 +299,7 @@ const Login = ({
           lon: 10.176736,
         });
         console.log(distance);
+        prompt(distance);
         if (distance > 300) {
           setError("You are too far from the coffee shop to log in.");
           setShowModal(true);
