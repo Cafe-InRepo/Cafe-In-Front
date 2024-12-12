@@ -213,6 +213,9 @@ const Login = ({
                 (position) => {
                   console.log(position.coords);
                   const { latitude, longitude } = position.coords;
+                  alert(latitude);
+                  alert(longitude);
+
                   setUserLocation({ lat: latitude, lon: longitude });
                   console.log(userLocation);
                 },
