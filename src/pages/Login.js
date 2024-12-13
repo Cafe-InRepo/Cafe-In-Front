@@ -303,7 +303,7 @@ const Login = ({
         });
         if (response.status === 200) {
           setPlaceLocation(response.data.placeLocation);
-          prompt(response.data.placeLocation);
+          prompt("location",response.data.placeLocation.long);
 
           // Check distance
           const distance = calculateDistance(userLocation, placeLocation);
