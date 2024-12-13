@@ -303,16 +303,16 @@ const Login = ({
         });
         if (response.status === 200) {
           setPlaceLocation(response.data.placeLocation);
-          prompt("location",response.data.placeLocation.long);
-
+          prompt("location", response.data.placeLocation.long);
           // Check distance
           const distance = calculateDistance(userLocation, placeLocation);
-          console.log(distance);
+          prompt(distance);
           if (distance > 30) {
             setError("You are too far from the coffee shop to log in.");
             setShowModal(true);
             return;
-          } else {
+          }
+          if (distance < 30) {
             localStorage.setItem("tableToken", response.data.token);
             localStorage.setItem("tableNumber", response.data.tableNumber);
             localStorage.setItem("placeName", response.data.placeName);
