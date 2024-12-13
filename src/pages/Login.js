@@ -63,6 +63,7 @@ const Login = ({
   const t = useSelector((state) => state.language.language);
   const Language = translations[t];
   const [userLocation, setUserLocation] = useState(null);
+  const [placeLocation, setPlaceLocation] = useState(null);
 
   // Function to get user's location
   const getUserLocation = async () => {
@@ -296,28 +297,27 @@ const Login = ({
           return;
         }
 
-        // Check distance
-        const distance = calculateDistance(userLocation, {
-          lat: 36.7880006,
-          lon: 10.1124222,
-        });
-        console.log(distance);
-        prompt(distance);
-        if (distance > 300) {
-          setError("You are too far from the coffee shop to log in.");
-          setShowModal(true);
-          return;
-        }
-
         // Proceed with QR login
         const response = await axios.post(`${baseUrl}/auth/login-qr`, {
           token,
         });
-
         if (response.status === 200) {
-          localStorage.setItem("tableToken", response.data.token);
-          localStorage.setItem("tableNumber", response.data.tableNumber);
-          navigate(`/menu`);
+          setPlaceLocation(response.data.placeLocation);
+          prompt(response.data.placeLocation);
+
+          // Check distance
+          const distance = calculateDistance(userLocation, placeLocation);
+          console.log(distance);
+          if (distance > 30) {
+            setError("You are too far from the coffee shop to log in.");
+            setShowModal(true);
+            return;
+          } else {
+            localStorage.setItem("tableToken", response.data.token);
+            localStorage.setItem("tableNumber", response.data.tableNumber);
+            localStorage.setItem("placeName", response.data.placeName);
+            navigate(`/menu`);
+          }
         }
       } catch (error) {
         console.error(
@@ -330,7 +330,7 @@ const Login = ({
         setIsLoading(false);
       }
     },
-    [navigate, userLocation]
+    [navigate, userLocation, placeLocation]
   );
 
   useEffect(() => {
