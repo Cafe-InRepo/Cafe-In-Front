@@ -63,7 +63,6 @@ const Login = ({
   const t = useSelector((state) => state.language.language);
   const Language = translations[t];
   const [userLocation, setUserLocation] = useState(null);
-  const [placeLocation, setPlaceLocation] = useState(null);
 
   // Function to get user's location
   const getUserLocation = async () => {
@@ -196,62 +195,45 @@ const Login = ({
       const getUserLocation = async () => {
         try {
           if (!navigator.geolocation) {
-            setError("Geolocation is not supported by your browser.");
-            setShowModal(true);
-            return;
+            throw new Error("Geolocation is not supported by your browser.");
           }
 
-          // Check if the Permissions API is supported
           if ("permissions" in navigator && navigator.permissions.query) {
             const permissionStatus = await navigator.permissions.query({
               name: "geolocation",
             });
             console.log(permissionStatus);
             alert(permissionStatus.state);
-            if (permissionStatus.state === "granted") {
-              // Permission granted, get the location
-              navigator.geolocation.getCurrentPosition(
-                (position) => {
-                  console.log(position.coords);
-                  const { latitude, longitude } = position.coords;
-                  alert(latitude);
-                  alert(longitude);
 
-                  setUserLocation({ lat: latitude, lon: longitude });
-                  console.log(userLocation);
-                },
-                (error) => {
-                  console.error("Error retrieving location:", error);
-                  setError("Unable to retrieve your location.");
-                  setShowModal(true);
-                },
-                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-              );
-            } else if (permissionStatus.state === "prompt") {
-              // Permission prompt, request location access
-              navigator.geolocation.getCurrentPosition(
-                (position) => {
-                  const { latitude, longitude } = position.coords;
-                  setUserLocation({ lat: latitude, lon: longitude });
-                },
-                (error) => {
-                  if (error.code === error.PERMISSION_DENIED) {
-                    setError(
-                      "Location permission denied. Please enable location services to proceed."
+            if (
+              permissionStatus.state === "granted" ||
+              permissionStatus.state === "prompt"
+            ) {
+              return new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(
+                  (position) => {
+                    const { latitude, longitude } = position.coords;
+                    alert(latitude);
+                    alert(longitude);
+                    resolve({ lat: latitude, lon: longitude });
+                  },
+                  (error) => {
+                    console.error("Error retrieving location:", error);
+                    reject(
+                      error.code === error.PERMISSION_DENIED
+                        ? "Location permission denied. Please enable location services."
+                        : "Unable to retrieve your location."
                     );
-                  } else {
-                    setError("Unable to retrieve your location.");
-                  }
-                  setShowModal(true);
-                },
-                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                  },
+                  { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                );
+              });
+            }
+
+            if (permissionStatus.state === "denied") {
+              throw new Error(
+                "Location access is denied. Please enable location services in your browser settings."
               );
-            } else if (permissionStatus.state === "denied") {
-              // Permission denied
-              setError(
-                "Location access is denied. Please enable location services in your browser settings and try again."
-              );
-              setShowModal(true);
             }
 
             // Listen for permission state changes
@@ -261,79 +243,80 @@ const Login = ({
                 permissionStatus.state
               );
             };
-          } else {
-            // Fallback for browsers without Permissions API
+          }
+
+          // Fallback for browsers without Permissions API
+          return new Promise((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(
               (position) => {
                 const { latitude, longitude } = position.coords;
-                setUserLocation({ lat: latitude, lon: longitude });
+                resolve({ lat: latitude, lon: longitude });
               },
               (error) => {
-                if (error.code === error.PERMISSION_DENIED) {
-                  setError(
-                    "Location permission denied. Please enable location services to proceed."
-                  );
-                } else {
-                  setError("Unable to retrieve your location.");
-                }
-                setShowModal(true);
+                reject(
+                  error.code === error.PERMISSION_DENIED
+                    ? "Location permission denied. Please enable location services."
+                    : "Unable to retrieve your location."
+                );
               },
               { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
             );
-          }
+          });
         } catch (error) {
           console.error("Error accessing geolocation:", error);
-          setError("An unexpected error occurred while accessing location.");
-          setShowModal(true);
+          throw new Error(
+            error.message ||
+              "An unexpected error occurred while accessing location."
+          );
         }
       };
+
       setError("");
       setIsLoading(true);
 
       try {
-        // Ensure location is enabled and available
-        if (!userLocation) {
-          await getUserLocation();
-          return;
-        }
+        // Ensure location is available
+        const location = userLocation || (await getUserLocation());
+        setUserLocation(location);
 
         // Proceed with QR login
         const response = await axios.post(`${baseUrl}/auth/login-qr`, {
           token,
         });
         if (response.status === 200) {
-          setPlaceLocation(response.data.placeLocation);
           prompt("location", response.data.placeLocation.long);
+
           // Check distance
-          const distance = calculateDistance(userLocation, placeLocation);
+          const distance = calculateDistance(
+            location,
+            response.data.placeLocation
+          );
           prompt("distance", distance);
+
           if (distance > 30) {
             setError("You are too far from the coffee shop to log in.");
             setShowModal(true);
             return;
           }
-          if (distance < 30) {
-            localStorage.setItem("tableToken", response.data.token);
-            localStorage.setItem("tableNumber", response.data.tableNumber);
-            localStorage.setItem("placeName", response.data.placeName);
-            navigate(`/menu`);
-          } else {
-            setError("an error occured please try again.");
-            setShowModal(true);
-          }
+
+          // Successful login
+          localStorage.setItem("tableToken", response.data.token);
+          localStorage.setItem("tableNumber", response.data.tableNumber);
+          localStorage.setItem("placeName", response.data.placeName);
+          navigate(`/menu`);
+        } else {
+          setError("An error occurred, please try again.");
+          setShowModal(true);
         }
       } catch (error) {
-        console.error(
-          "Error logging in:",
-          error.response?.data?.msg || error.message
-        );
-        setError(error.response?.data?.msg || "Login failed");
+        console.error("Error logging in:", error.message);
+        setError(error.message || "Login failed");
         setShowModal(true);
       } finally {
         setIsLoading(false);
       }
     },
-    [navigate, userLocation, placeLocation]
+    [navigate, userLocation]
   );
 
   useEffect(() => {
