@@ -300,7 +300,7 @@ const Login = ({
           );
           prompt("distance", distance);
 
-          if (distance > 100) {
+          if (distance > response.data.distance) {
             setError("You are too far from the coffee shop to log in.");
             setShowModal(true);
             return;
