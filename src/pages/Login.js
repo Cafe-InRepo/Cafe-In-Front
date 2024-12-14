@@ -284,7 +284,8 @@ const Login = ({
           token,
         });
         if (response.status === 200) {
-          prompt("location", response.data.placeLocation.long);
+          prompt("location long", response.data.placeLocation.long);
+          prompt("location lat", response.data.placeLocation.lat);
 
           // Check distance
           const distance = calculateDistance(
