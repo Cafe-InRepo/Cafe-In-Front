@@ -188,6 +188,12 @@ const Login = ({
 
     return R * c; // Distance in meters
   };
+  prompt(
+    calculateDistance(
+      { lon: 36.7896694736, lat: 10.11080675438 },
+      { long: 36.7896694736, lat: 10.11080675438 }
+    )
+  );
   // Handle QR code login based on token from URL
 
   const handleQRLogin = useCallback(
@@ -294,7 +300,7 @@ const Login = ({
           );
           prompt("distance", distance);
 
-          if (distance > 30) {
+          if (distance > 100) {
             setError("You are too far from the coffee shop to log in.");
             setShowModal(true);
             return;
