@@ -180,7 +180,7 @@ const Login = ({
     const φ1 = toRadians(loc1.lat);
     const φ2 = toRadians(loc2.lat);
     const Δφ = toRadians(loc2.lat - loc1.lat);
-    const Δλ = toRadians(loc2.lon - loc1.lon);
+    const Δλ = toRadians(loc2.long - loc1.lon);
 
     const a =
       Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
@@ -306,7 +306,7 @@ const Login = ({
           prompt("location", response.data.placeLocation.long);
           // Check distance
           const distance = calculateDistance(userLocation, placeLocation);
-          prompt(distance);
+          prompt("distance", distance);
           if (distance > 30) {
             setError("You are too far from the coffee shop to log in.");
             setShowModal(true);
@@ -317,6 +317,9 @@ const Login = ({
             localStorage.setItem("tableNumber", response.data.tableNumber);
             localStorage.setItem("placeName", response.data.placeName);
             navigate(`/menu`);
+          } else {
+            setError("an error occured please try again.");
+            setShowModal(true);
           }
         }
       } catch (error) {
