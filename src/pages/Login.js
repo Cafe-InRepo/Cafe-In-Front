@@ -1,19 +1,21 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import AnimationRevealPage from "helpers/AnimationRevealPage.js";
 import { Container as ContainerBase } from "components/misc/Layouts";
 import tw from "twin.macro";
 import styled from "styled-components";
+import { css } from "styled-components/macro"; //eslint-disable-line
 import illustration from "images/login-illustration.svg";
 import logo from "images/logo.svg";
 import { ReactComponent as LoginIcon } from "feather-icons/dist/icons/log-in.svg";
 import axios from "axios";
 import { baseUrl } from "helpers/BaseUrl";
 import Loading from "helpers/Loading";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ErrorModal from "../helpers/modals/ErrorModal"; // Import your ErrorModal component
 import { useSelector } from "react-redux";
 import translations from "app/language";
-
+import { useLocation } from "react-router-dom";
+import { useCallback } from "react";
 const Container = tw(
   ContainerBase
 )`min-h-screen bg-primary-900 text-white font-medium flex justify-center -m-8`;
@@ -49,62 +51,135 @@ const Login = ({
   headingText = "Sign In As Waiter",
   submitButtonText = "Sign In",
   SubmitButtonIcon = LoginIcon,
+  forgotPasswordUrl = "#",
 }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [userLocation, setUserLocation] = useState(null);
+  const [showModal, setShowModal] = useState(false); // State to control modal display
   const navigate = useNavigate();
-  const location = useLocation();
+  const location = useLocation(); // Hook to get URL params
   const t = useSelector((state) => state.language.language);
   const Language = translations[t];
+  const [userLocation, setUserLocation] = useState(null);
 
-  /**
-   * Fetch the user's geolocation with proper error handling.
-   */
-  const getLocation = async () => {
+  // Function to get user's location
+  const getUserLocation = async () => {
     try {
       if (!navigator.geolocation) {
-        throw new Error("Geolocation is not supported by your browser.");
+        setError("Geolocation is not supported by your browser.");
+        setShowModal(true);
+        return;
       }
 
-      return new Promise((resolve, reject) => {
+      // Check if the Permissions API is supported
+      if ("permissions" in navigator && navigator.permissions.query) {
+        const permissionStatus = await navigator.permissions.query({
+          name: "geolocation",
+        });
+        console.log(permissionStatus);
+        alert(permissionStatus.state);
+        if (permissionStatus.state === "granted") {
+          // Permission granted, get the location
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              console.log(position.coords);
+              const { latitude, longitude } = position.coords;
+              setUserLocation({ lat: latitude, lon: longitude });
+              console.log(userLocation);
+            },
+            (error) => {
+              console.error("Error retrieving location:", error);
+              setError("Unable to retrieve your location.");
+              setShowModal(true);
+            },
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+          );
+        } else if (permissionStatus.state === "prompt") {
+          // Permission prompt, request location access
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const { latitude, longitude } = position.coords;
+              setUserLocation({ lat: latitude, lon: longitude });
+            },
+            (error) => {
+              if (error.code === error.PERMISSION_DENIED) {
+                setError(
+                  "Location permission denied. Please enable location services to proceed."
+                );
+              } else {
+                setError("Unable to retrieve your location.");
+              }
+              setShowModal(true);
+            },
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+          );
+        } else if (permissionStatus.state === "denied") {
+          // Permission denied
+          setError(
+            "Location access is denied. Please enable location services in your browser settings and try again."
+          );
+          setShowModal(true);
+        }
+
+        // Listen for permission state changes
+        permissionStatus.onchange = () => {
+          console.log("Permission state changed to:", permissionStatus.state);
+        };
+      } else {
+        // Fallback for browsers without Permissions API
         navigator.geolocation.getCurrentPosition(
           (position) => {
             const { latitude, longitude } = position.coords;
-            resolve({ lat: latitude, lon: longitude });
+            setUserLocation({ lat: latitude, lon: longitude });
           },
           (error) => {
-            reject(
-              error.code === error.PERMISSION_DENIED
-                ? "Location permission denied. Please enable location services."
-                : "Unable to retrieve your location."
-            );
+            if (error.code === error.PERMISSION_DENIED) {
+              setError(
+                "Location permission denied. Please enable location services to proceed."
+              );
+            } else {
+              setError("Unable to retrieve your location.");
+            }
+            setShowModal(true);
           },
           { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
         );
-      });
+      }
     } catch (error) {
       console.error("Error accessing geolocation:", error);
-      throw new Error(
-        error.message ||
-          "An unexpected error occurred while accessing location."
-      );
+      setError("An unexpected error occurred while accessing location.");
+      setShowModal(true);
     }
   };
 
-  /**
-   * Calculate the distance between two coordinates using the Haversine formula.
-   */
+  // Retry function to allow user to try enabling location services again
+  const retryLogin = async () => {
+    setShowModal(false); // Close the modal
+    await getUserLocation();
+
+    if (userLocation) {
+      // Retry the login process (QR or manual login) after location is fetched
+      const query = new URLSearchParams(location.search);
+      const token = query.get("token");
+
+      if (token) {
+        handleQRLogin(token);
+      } else {
+        handleSubmit(); // For manual login retry
+      }
+    }
+  };
+
+  // Function to calculate distance using Haversine formula
   const calculateDistance = (loc1, loc2) => {
     const toRadians = (degree) => (degree * Math.PI) / 180;
-    const R = 6371e3; // Earth's radius in meters
+    const R = 6371e3; // Radius of Earth in meters
     const φ1 = toRadians(loc1.lat);
     const φ2 = toRadians(loc2.lat);
     const Δφ = toRadians(loc2.lat - loc1.lat);
-    const Δλ = toRadians(loc2.lon - loc1.lon);
+    const Δλ = toRadians(loc2.long - loc1.lon);
 
     const a =
       Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
@@ -114,58 +189,189 @@ const Login = ({
     return R * c; // Distance in meters
   };
 
-  /**
-   * Handle QR code login using a token from the URL.
-   */
+  // Handle QR code login based on token from URL
+
   const handleQRLogin = useCallback(
     async (token) => {
+      const getUserLocation = async () => {
+        try {
+          if (!navigator.geolocation) {
+            throw new Error("Geolocation is not supported by your browser.");
+          }
+
+          if ("permissions" in navigator && navigator.permissions.query) {
+            const permissionStatus = await navigator.permissions.query({
+              name: "geolocation",
+            });
+            console.log(permissionStatus);
+            alert(permissionStatus.state);
+
+            if (
+              permissionStatus.state === "granted" ||
+              permissionStatus.state === "prompt"
+            ) {
+              return new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(
+                  (position) => {
+                    const { latitude, longitude } = position.coords;
+                    alert(latitude);
+                    alert(longitude);
+                    resolve({ lat: latitude, lon: longitude });
+                  },
+                  (error) => {
+                    console.error("Error retrieving location:", error);
+                    reject(
+                      error.code === error.PERMISSION_DENIED
+                        ? "Location permission denied. Please enable location services."
+                        : "Unable to retrieve your location."
+                    );
+                  },
+                  { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                );
+              });
+            }
+
+            if (permissionStatus.state === "denied") {
+              throw new Error(
+                "Location access is denied. Please enable location services in your browser settings."
+              );
+            }
+
+            // Listen for permission state changes
+            permissionStatus.onchange = () => {
+              console.log(
+                "Permission state changed to:",
+                permissionStatus.state
+              );
+            };
+          }
+
+          // Fallback for browsers without Permissions API
+          return new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                const { latitude, longitude } = position.coords;
+                resolve({ lat: latitude, lon: longitude });
+              },
+              (error) => {
+                reject(
+                  error.code === error.PERMISSION_DENIED
+                    ? "Location permission denied. Please enable location services."
+                    : "Unable to retrieve your location."
+                );
+              },
+              { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            );
+          });
+        } catch (error) {
+          console.error("Error accessing geolocation:", error);
+          throw new Error(
+            error.message ||
+              "An unexpected error occurred while accessing location."
+          );
+        }
+      };
+
       setError("");
       setIsLoading(true);
 
       try {
-        const location = userLocation || (await getLocation());
+        // Ensure location is available
+        const location = userLocation || (await getUserLocation());
         setUserLocation(location);
 
+        // Proceed with QR login
         const response = await axios.post(`${baseUrl}/auth/login-qr`, {
           token,
         });
         if (response.status === 200) {
+          // Check distance
           const distance = calculateDistance(
             location,
             response.data.placeLocation
           );
 
           if (distance > response.data.distance) {
-            throw new Error("You are too far from the coffee shop to log in.");
+            setError("You are too far from the coffee shop to log in.");
+            setShowModal(true);
+            return;
           }
 
+          // Successful login
           localStorage.setItem("tableToken", response.data.token);
           localStorage.setItem("tableNumber", response.data.tableNumber);
           localStorage.setItem("placeName", response.data.placeName);
           navigate(`/menu`);
+        } else {
+          setError("An error occurred, please try again.");
+          setShowModal(true);
         }
       } catch (error) {
-        setError(error.message || "An unexpected error occurred.");
+        console.error("Error logging in:", error.message);
+        setError(error.message || "Login failed");
         setShowModal(true);
       } finally {
         setIsLoading(false);
       }
     },
-    [userLocation, navigate]
+    [navigate, userLocation]
   );
 
-  const handleRetry = async () => {
-    setShowModal(false);
+  useEffect(() => {
     const query = new URLSearchParams(location.search);
     const token = query.get("token");
+
     if (token) {
-      await handleQRLogin(token);
+      handleQRLogin(token);
+    }
+  }, [location.search, handleQRLogin]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await axios.post(`${baseUrl}/auth/login-table`, {
+        email,
+        password,
+      });
+
+      if (response.status === 200) {
+        // Store the new token
+        localStorage.setItem("tableToken", response.data.token);
+        navigate(`/menu`);
+      }
+    } catch (error) {
+      console.error(
+        "Error logging in:",
+        error.response?.data?.msg || error.message
+      );
+      setError(error.response?.data?.msg || "Login failed");
+      setShowModal(true); // Show modal on error
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <AnimationRevealPage>
       <Container>
+        {showModal && (
+          <ErrorModal
+            error={error}
+            closeModal={closeModal}
+            retryAction={retryLogin} // Pass the retry function to the modal
+          />
+        )}{" "}
         <Content>
           <MainContainer>
             <LogoLink href={logoLinkUrl}>
@@ -174,31 +380,35 @@ const Login = ({
             <MainContent>
               <Heading>{headingText}</Heading>
               <FormContainer>
-                {isLoading && <Loading />}
-                {!isLoading && (
-                  <Form>
-                    <Input
-                      type="email"
-                      placeholder="Email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                    <Input
-                      type="password"
-                      placeholder="Password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <SubmitButton
-                      type="button"
-                      onClick={() => handleQRLogin("manual-login")}
-                    >
-                      <SubmitButtonIcon className="icon" />
-                      <span className="text">{submitButtonText}</span>
-                    </SubmitButton>
-                    {error && <ErrorMessage>{error}</ErrorMessage>}
-                  </Form>
-                )}
+                <Form onSubmit={handleSubmit}>
+                  <Input
+                    type="email"
+                    placeholder={Language.email}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                  <Input
+                    type="password"
+                    placeholder={Language.password}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                  <SubmitButton type="submit" disabled={isLoading}>
+                    <SubmitButtonIcon className="icon" />
+                    <span className="text">{submitButtonText}</span>
+                  </SubmitButton>
+                </Form>
+                <ErrorMessage>{error}</ErrorMessage>{" "}
+                <p tw="mt-6 text-xs text-gray-600 text-center">
+                  <a
+                    href={forgotPasswordUrl}
+                    tw="border-b border-gray-500 border-dotted"
+                  >
+                    Forgot Password?
+                  </a>
+                </p>
               </FormContainer>
             </MainContent>
           </MainContainer>
@@ -207,12 +417,6 @@ const Login = ({
           </IllustrationContainer>
         </Content>
       </Container>
-      <ErrorModal
-        show={showModal}
-        message={error}
-        onRetry={handleRetry}
-        onClose={() => setShowModal(false)}
-      />
     </AnimationRevealPage>
   );
 };
