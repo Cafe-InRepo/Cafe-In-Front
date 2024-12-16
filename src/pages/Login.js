@@ -79,7 +79,6 @@ const Login = ({
           name: "geolocation",
         });
         console.log(permissionStatus);
-        alert(permissionStatus.state);
         if (permissionStatus.state === "granted") {
           // Permission granted, get the location
           navigator.geolocation.getCurrentPosition(
@@ -204,7 +203,6 @@ const Login = ({
               name: "geolocation",
             });
             console.log(permissionStatus);
-            alert(permissionStatus.state);
 
             if (
               permissionStatus.state === "granted" ||
@@ -214,8 +212,6 @@ const Login = ({
                 navigator.geolocation.getCurrentPosition(
                   (position) => {
                     const { latitude, longitude } = position.coords;
-                    alert(latitude);
-                    alert(longitude);
                     resolve({ lat: latitude, lon: longitude });
                   },
                   (error) => {
