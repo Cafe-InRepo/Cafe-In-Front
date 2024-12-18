@@ -101,7 +101,7 @@ export default ({
     <>
       <LogoLink href="/">
         <img src={logo} alt="logo" />
-        {placeName == undefined ? { placeName } : "Order Craft"}
+        {placeName === undefined ? { placeName } : "Order Craft"}
       </LogoLink>
 
       <LanguageSelector />
