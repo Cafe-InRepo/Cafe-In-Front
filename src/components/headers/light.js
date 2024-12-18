@@ -77,6 +77,7 @@ export default ({
    * changing the defaultLinks variable below below.
    * If you manipulate links here, all the styling on the links is already done for you. If you pass links yourself though, you are responsible for styling the links or use the helper styled components that are defined here (NavLink)
    */
+  const placeName = localStorage.getItem("placeName");
   const defaultLinks = [
     <NavLinks key={1}>
       <NavLink href="/#">About</NavLink>
@@ -100,8 +101,9 @@ export default ({
     <>
       <LogoLink href="/">
         <img src={logo} alt="logo" />
-        Order Craft
+        {placeName == undefined ? { placeName } : "Order Craft"}
       </LogoLink>
+
       <LanguageSelector />
     </>
   );

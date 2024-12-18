@@ -192,106 +192,106 @@ const Login = ({
 
   const handleQRLogin = useCallback(
     async (token) => {
-      const getUserLocation = async () => {
-        try {
-          if (!navigator.geolocation) {
-            throw new Error("Geolocation is not supported by your browser.");
-          }
+      // const getUserLocation = async () => {
+      //   try {
+      //     if (!navigator.geolocation) {
+      //       throw new Error("Geolocation is not supported by your browser.");
+      //     }
 
-          if ("permissions" in navigator && navigator.permissions.query) {
-            const permissionStatus = await navigator.permissions.query({
-              name: "geolocation",
-            });
-            console.log(permissionStatus);
+      //     if ("permissions" in navigator && navigator.permissions.query) {
+      //       const permissionStatus = await navigator.permissions.query({
+      //         name: "geolocation",
+      //       });
+      //       console.log(permissionStatus);
 
-            if (
-              permissionStatus.state === "granted" ||
-              permissionStatus.state === "prompt"
-            ) {
-              return new Promise((resolve, reject) => {
-                navigator.geolocation.getCurrentPosition(
-                  (position) => {
-                    const { latitude, longitude } = position.coords;
-                    resolve({ lat: latitude, lon: longitude });
-                  },
-                  (error) => {
-                    console.error("Error retrieving location:", error);
-                    reject(
-                      error.code === error.PERMISSION_DENIED
-                        ? "Location permission denied. Please enable location services."
-                        : "Unable to retrieve your location."
-                    );
-                  },
-                  { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-                );
-              });
-            }
+      //       if (
+      //         permissionStatus.state === "granted" ||
+      //         permissionStatus.state === "prompt"
+      //       ) {
+      //         return new Promise((resolve, reject) => {
+      //           navigator.geolocation.getCurrentPosition(
+      //             (position) => {
+      //               const { latitude, longitude } = position.coords;
+      //               resolve({ lat: latitude, lon: longitude });
+      //             },
+      //             (error) => {
+      //               console.error("Error retrieving location:", error);
+      //               reject(
+      //                 error.code === error.PERMISSION_DENIED
+      //                   ? "Location permission denied. Please enable location services."
+      //                   : "Unable to retrieve your location."
+      //               );
+      //             },
+      //             { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      //           );
+      //         });
+      //       }
 
-            if (permissionStatus.state === "denied") {
-              throw new Error(
-                "Location access is denied. Please enable location services in your browser settings."
-              );
-            }
+      //       if (permissionStatus.state === "denied") {
+      //         throw new Error(
+      //           "Location access is denied. Please enable location services in your browser settings."
+      //         );
+      //       }
 
-            // Listen for permission state changes
-            permissionStatus.onchange = () => {
-              console.log(
-                "Permission state changed to:",
-                permissionStatus.state
-              );
-            };
-          }
+      //       // Listen for permission state changes
+      //       permissionStatus.onchange = () => {
+      //         console.log(
+      //           "Permission state changed to:",
+      //           permissionStatus.state
+      //         );
+      //       };
+      //     }
 
-          // Fallback for browsers without Permissions API
-          return new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(
-              (position) => {
-                const { latitude, longitude } = position.coords;
-                resolve({ lat: latitude, lon: longitude });
-              },
-              (error) => {
-                reject(
-                  error.code === error.PERMISSION_DENIED
-                    ? "Location permission denied. Please enable location services."
-                    : "Unable to retrieve your location."
-                );
-              },
-              { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-            );
-          });
-        } catch (error) {
-          console.error("Error accessing geolocation:", error);
-          throw new Error(
-            error.message ||
-              "An unexpected error occurred while accessing location."
-          );
-        }
-      };
+      //     // Fallback for browsers without Permissions API
+      //     return new Promise((resolve, reject) => {
+      //       navigator.geolocation.getCurrentPosition(
+      //         (position) => {
+      //           const { latitude, longitude } = position.coords;
+      //           resolve({ lat: latitude, lon: longitude });
+      //         },
+      //         (error) => {
+      //           reject(
+      //             error.code === error.PERMISSION_DENIED
+      //               ? "Location permission denied. Please enable location services."
+      //               : "Unable to retrieve your location."
+      //           );
+      //         },
+      //         { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      //       );
+      //     });
+      //   } catch (error) {
+      //     console.error("Error accessing geolocation:", error);
+      //     throw new Error(
+      //       error.message ||
+      //         "An unexpected error occurred while accessing location."
+      //     );
+      //   }
+      // };
 
       setError("");
       setIsLoading(true);
 
       try {
-        // Ensure location is available
-        const location = userLocation || (await getUserLocation());
-        setUserLocation(location);
+        // // Ensure location is available
+        // const location = userLocation || (await getUserLocation());
+        // setUserLocation(location);
 
         // Proceed with QR login
         const response = await axios.post(`${baseUrl}/auth/login-qr`, {
           token,
         });
         if (response.status === 200) {
-          // Check distance
-          const distance = calculateDistance(
-            location,
-            response.data.placeLocation
-          );
+          // // Check distance
+          // const distance = calculateDistance(
+          //   location,
+          //   response.data.placeLocation
+          // );
 
-          if (distance > response.data.distance) {
-            setError("You are too far from the coffee shop to log in.");
-            setShowModal(true);
-            return;
-          }
+          // if (distance > response.data.distance) {
+          //   setError("You are too far from the coffee shop to log in.");
+          //   setShowModal(true);
+          //   return;
+          // }
 
           // Successful login
           localStorage.setItem("tableToken", response.data.token);

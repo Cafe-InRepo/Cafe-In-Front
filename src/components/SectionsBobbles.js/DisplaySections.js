@@ -14,12 +14,13 @@ import Nav from "components/hero/Nav";
 import tw from "twin.macro";
 import { SectionHeading } from "components/misc/Headings";
 import Bobbles from "./bobbles";
+import NotifSupport from "components/features/NotificationSupport";
 
 const GridWrapper = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr); /* Two equal-width columns */
   justify-items: center;
-  paddingBottom :200px;
+  paddingbottom: 200px;
 `;
 
 // const Bubble = styled.div`
@@ -100,6 +101,7 @@ const SectionSelector = ({ heading }) => {
   return (
     <AnimationRevealPage>
       <Nav />
+      <NotifSupport />
       <Container>
         <Header>{heading}</Header>
 
