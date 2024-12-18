@@ -172,21 +172,21 @@ const Login = ({
   };
 
   // Function to calculate distance using Haversine formula
-  const calculateDistance = (loc1, loc2) => {
-    const toRadians = (degree) => (degree * Math.PI) / 180;
-    const R = 6371e3; // Radius of Earth in meters
-    const φ1 = toRadians(loc1.lat);
-    const φ2 = toRadians(loc2.lat);
-    const Δφ = toRadians(loc2.lat - loc1.lat);
-    const Δλ = toRadians(loc2.long - loc1.lon);
+  // const calculateDistance = (loc1, loc2) => {
+  //   const toRadians = (degree) => (degree * Math.PI) / 180;
+  //   const R = 6371e3; // Radius of Earth in meters
+  //   const φ1 = toRadians(loc1.lat);
+  //   const φ2 = toRadians(loc2.lat);
+  //   const Δφ = toRadians(loc2.lat - loc1.lat);
+  //   const Δλ = toRadians(loc2.long - loc1.lon);
 
-    const a =
-      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  //   const a =
+  //     Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+  //     Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+  //   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    return R * c; // Distance in meters
-  };
+  //   return R * c; // Distance in meters
+  // };
 
   // Handle QR code login based on token from URL
 
@@ -310,7 +310,7 @@ const Login = ({
         setIsLoading(false);
       }
     },
-    [navigate, userLocation]
+    [navigate] //userLocation
   );
 
   useEffect(() => {
