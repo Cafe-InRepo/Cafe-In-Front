@@ -42,10 +42,11 @@ const TipsPage = () => {
 
   const handleSubmit = async () => {
     setIsLoading(true);
+    const tipAmount = customTip || selectedTip; // Use custom tip if available, else use selected tip
     try {
       await axios.post(
         `${baseUrl}/order/${orderId}/tips`,
-        { selectedTip },
+        { selectedTip: tipAmount }, // Send the correct tip value
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -55,10 +56,11 @@ const TipsPage = () => {
       setTipped(true);
       setIsLoading(false);
     } catch (error) {
-      console.error("Error submitting ratings:", error);
+      console.error("Error submitting tip:", error);
       setIsLoading(false);
     }
   };
+
   if (tipped) {
     return (
       <Container>
@@ -69,10 +71,13 @@ const TipsPage = () => {
       </Container>
     );
   }
+
   const isSubmitDisabled = !selectedTip && !customTip;
+
   if (isLoading) {
     return <Loading />;
   }
+
   return (
     <Container>
       <Card>
