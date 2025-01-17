@@ -83,6 +83,8 @@ const OrderList = () => {
         });
 
         setOrders(response.data);
+        console.log(response.data);
+
         setIsLoading(false); // Set loading to false when data is fetched
       } catch (error) {
         if (error.response.status === 404) {
@@ -140,6 +142,9 @@ const OrderList = () => {
   const handleRate = async (orderId) => {
     navigate(`/order/rate/${orderId}`);
   };
+  const handleTips = async (orderId) => {
+    navigate(`/order/tips/${orderId}`);
+  };
 
   const handleAddNewOrder = () => {
     navigate("/menu");
@@ -187,7 +192,8 @@ const OrderList = () => {
                     <ul>
                       {order.products.map(({ product, quantity }, index) => (
                         <li key={index}>
-                          {product?.name} : {product?.price} TND (Qty: {quantity})
+                          {product?.name} : {product?.price} TND (Qty:{" "}
+                          {quantity})
                         </li>
                       ))}
                     </ul>
@@ -195,12 +201,20 @@ const OrderList = () => {
                 </span>
                 <ButtonContainer>
                   {order.status === "completed" ? (
-                    <PrimaryButton
-                      onClick={() => handleRate(order._id)}
-                      disabled={order.rated}
-                    >
-                      {order.rated ? Language.rated : Language.rate}
-                    </PrimaryButton>
+                    <>
+                      <PrimaryButton
+                        onClick={() => handleRate(order._id)}
+                        disabled={order.rated}
+                      >
+                        {order.rated ? Language.rated : Language.rate}
+                      </PrimaryButton>
+                      <PrimaryButton
+                        onClick={() => handleTips(order._id)}
+                        disabled={order.tips}
+                      >
+                        {order.tips ? "Tipped" : "Tip"}
+                      </PrimaryButton>
+                    </>
                   ) : (
                     <>
                       <PrimaryButton

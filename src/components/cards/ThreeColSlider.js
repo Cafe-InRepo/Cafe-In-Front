@@ -177,6 +177,9 @@ export default () => {
       });
       if (response.status === 200) {
         setOrder(response.data);
+        setComment(response.data.comment);
+        console.log(response.data);
+
         setIsLoading(false);
       }
     } catch (error) {
@@ -205,7 +208,11 @@ export default () => {
       const updatedProducts = order.products.filter(
         (product) => product.product._id !== item.product._id
       );
-      const updatedOrder = { ...order, products: updatedProducts };
+      const updatedOrder = {
+        ...order,
+        products: updatedProducts,
+        comment: comment,
+      };
 
       try {
         const response = await axios.put(

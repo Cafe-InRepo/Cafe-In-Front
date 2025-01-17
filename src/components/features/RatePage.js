@@ -75,17 +75,8 @@ const RatePage = () => {
           },
         }
       );
-      await axios.put(
-        `${baseUrl}/order/${orderId}`,
-        { rated: true },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
       setIsLoading(false);
-      window.location.reload();
+      order.rated = true;
     } catch (error) {
       console.error("Error submitting ratings:", error);
       setIsLoading(false);

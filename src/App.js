@@ -18,6 +18,7 @@ import LoginPage from "./pages/Login";
 import translations from "app/language.js";
 import { useSelector } from "react-redux";
 import SectionSelector from "components/SectionsBobbles.js/DisplaySections.js";
+import TipsPage from "components/features/TipsPage.js";
 // import NotFoundPage from "./pages/NotFoundPage"; // Import the NotFoundPage component
 
 // Move HighlightedText definition outside of the App component
@@ -54,6 +55,14 @@ export default function App() {
             element={
               <PrivateRoute>
                 <RatePage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/order/tips/:orderId"
+            element={
+              <PrivateRoute>
+                <TipsPage />
               </PrivateRoute>
             }
           />
