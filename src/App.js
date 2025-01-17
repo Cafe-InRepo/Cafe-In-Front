@@ -8,7 +8,6 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-
 import ThankYouPage from "ThankYouPage.js";
 import SliderCard from "./components/cards/ThreeColSlider.js";
 import TabGrid from "components/cards/TabCardGrid.js";
@@ -28,6 +27,7 @@ export default function App() {
   const t = useSelector((state) => state.language.language);
   const Language = translations[t];
   const tableNumber = localStorage.getItem("tableNumber");
+
   return (
     <>
       <GlobalStyles />
@@ -83,16 +83,16 @@ export default function App() {
           <Route
             path="/categories/:categoryId"
             element={
-              <PrivateRoute>
+              <>
                 <TabGrid
                   heading={
-                    <>
+                    <PrivateRoute>
                       {Language.menuCheck}{" "}
                       <HighlightedText>{Language.menu}</HighlightedText>
-                    </>
+                    </PrivateRoute>
                   }
                 />
-              </PrivateRoute>
+              </>
             }
           />
           <Route path="/thank-you" element={<ThankYouPage />} />

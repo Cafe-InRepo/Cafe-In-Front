@@ -143,6 +143,18 @@ const TotalPriceContainer = styled.div`
   font-size: 1.25rem;
   font-weight: bold;
 `;
+const CommentContainer = styled.div`
+  ${tw`mt-4 flex flex-col w-full`}
+`;
+
+const CommentLabel = styled.label`
+  ${tw`text-lg font-semibold mb-2`}
+`;
+
+const CommentTextarea = styled.textarea`
+  ${tw`w-full p-3 border rounded-lg text-sm leading-relaxed`}
+  min-height: 100px;
+`;
 
 export default () => {
   const [sliderRef, setSliderRef] = useState(null);
@@ -155,7 +167,7 @@ export default () => {
   const [isLoading, setIsLoading] = useState(true);
   const token = GetToken();
   const [currentSlide, setCurrentSlide] = useState(0);
-
+  const [comment, setComment] = useState(order?.comment || "");
   const fetchOrder = useCallback(async () => {
     try {
       const response = await axios.get(`${baseUrl}/order/${orderId}`, {
@@ -257,8 +269,7 @@ export default () => {
           quantity: updatedQuantities[product.product._id] || product.quantity,
         }));
 
-    const orderData = { products };
-
+    const orderData = { products, comment };
     try {
       let response;
       let message;
@@ -432,6 +443,22 @@ export default () => {
               </Card>
             ))}
           </CardSlider>
+          <CommentContainer>
+            <CommentLabel htmlFor="orderComment">
+              {Language.comment || "Comment"}
+            </CommentLabel>
+            <CommentTextarea
+              id="orderComment"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder={Language.addYourComment || "Add Your Comment"}
+            />
+          </CommentContainer>
+
+          <PlaceOrderButton onClick={handlePlaceOrder}>
+            {orderId ? "Update the Order" : "Place the Order"}
+            <ArrowRightIcon />
+          </PlaceOrderButton>
           <TotalPriceContainer>
             {Language.totalPrice}: {totalPrice.toFixed(2)} TND
           </TotalPriceContainer>

@@ -4,7 +4,7 @@ import styled, { keyframes } from "styled-components";
 import { ReactComponent as BasketIconSvg } from "../../images/bill.svg"; // Ensure this path is correct
 import socket from "helpers/soket/socket";
 import { GetToken } from "helpers/GetToken";
-import {jwtDecode} from "jwt-decode"; // Import the jwt-decode library
+import { jwtDecode } from "jwt-decode"; // Import the jwt-decode library
 import { io } from "socket.io-client";
 import { baseUrl } from "helpers/BaseUrl";
 
@@ -32,6 +32,12 @@ const IconContainer = styled.div`
   &.processing {
     animation: ${moveAnimation} 1s ease-in-out infinite;
   }
+
+  // Disable pointer events and reduce opacity when disabled
+  &.disabled {
+    pointer-events: none;
+    opacity: 0.6;
+  }
 `;
 
 // Style the icon itself
@@ -39,6 +45,7 @@ const StyledBasketIcon = styled(BasketIconSvg)``;
 
 const NotifSupport = () => {
   const [isProcessing, setIsProcessing] = useState(false); // For tracking the call status
+  const [isDisabled, setIsDisabled] = useState(false); // For tracking the button disabled state
   const token = GetToken();
 
   // Decode the token and extract the tableNumber
@@ -63,8 +70,15 @@ const NotifSupport = () => {
   const handleCallSupportClick = () => {
     if (tableNumber) {
       setIsProcessing(true); // Start showing the animation
+      setIsDisabled(true); // Disable the button
+
       console.log("calling from table", tableNumber);
       callForSupport(tableNumber);
+
+      // Re-enable the button after 1 minute
+      setTimeout(() => {
+        setIsDisabled(false);
+      }, 60000);
     } else {
       console.error("Table number not found in token");
     }
@@ -90,12 +104,13 @@ const NotifSupport = () => {
   };
 
   return (
-    // Add or remove the 'processing' class based on the internal state
+    // Add or remove the 'processing' or 'disabled' class based on the internal state
     <IconContainer
       onClick={handleCallSupportClick}
-      className={isProcessing ? "processing" : ""}
+      className={`${isProcessing ? "processing" : ""} ${
+        isDisabled ? "disabled" : ""
+      }`}
     >
-      {/* Icon styled directly without passing isProcessing as a prop */}
       <StyledBasketIcon />
     </IconContainer>
   );

@@ -74,6 +74,7 @@ const SectionSelector = ({ heading }) => {
     };
 
     fetchSections();
+    
   }, [token]); // Include 'token' as a dependency
 
   const handleSectionClick = (sectionId) => {
