@@ -184,9 +184,27 @@ const OrderList = () => {
                     {Language.status}: {order.status}
                   </span>
                   <div className="description">
-                    {Language.totalPrice}:{" "}
-                    <b> {order.totalPrice.toFixed(2)} TND</b>
+                    <div>
+                      <span>Price:</span>{" "}
+                      <b>{Number(order.totalPrice).toFixed(2)} TND</b>
+                    </div>
+                    {order.tips && (
+                      <div>
+                        <span>Tips:</span>{" "}
+                        <b>{Number(order.tips).toFixed(1)} TND</b>
+                      </div>
+                    )}
+                    <div>
+                      <span>Total:</span>{" "}
+                      <b>
+                        {(
+                          Number(order.totalPrice) + (Number(order.tips) || 0)
+                        ).toFixed(2)}{" "}
+                        TND
+                      </b>
+                    </div>
                   </div>
+
                   <div className="productList">
                     {Language.Products}:
                     <ul>
