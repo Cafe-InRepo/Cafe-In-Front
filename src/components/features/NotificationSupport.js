@@ -43,41 +43,54 @@ const IconContainer = styled.div`
 // Style the icon itself
 const StyledBasketIcon = styled(BasketIconSvg)``;
 
+// Styled message container
+const MessageContainer = styled.div`
+  ${tw`fixed bg-green-500 text-white py-2 px-4 rounded-md shadow-lg`}
+  left: 50%;
+  transform: translateX(-50%);
+  top: 20%;
+  z-index: 2;
+`;
+
 const NotifSupport = () => {
   const [isProcessing, setIsProcessing] = useState(false); // For tracking the call status
   const [isDisabled, setIsDisabled] = useState(false); // For tracking the button disabled state
+  const [message, setMessage] = useState(""); // For showing notifications
   const token = GetToken();
 
   // Decode the token and extract the tableNumber
   let tableNumber = null;
+  let superClientId = null;
   if (token) {
     try {
       const decodedToken = jwtDecode(token); // Decode the token
       tableNumber = decodedToken.table.number; // Extract tableNumber from the decoded token
+      superClientId = decodedToken.user.id;
     } catch (error) {
       console.error("Failed to decode token:", error);
     }
   }
 
-  const callForSupport = (tableNumber) => {
-    socket.emit("supportRequest", { tableNumber });
-
+  const callForSupport = (tableNumber, superClientId) => {
+    socket.emit("supportRequest", { tableNumber, superClientId });
     return () => {
       socket.disconnect();
     };
   };
 
   const handleCallSupportClick = () => {
-    if (tableNumber) {
+    if (tableNumber && superClientId) {
       setIsProcessing(true); // Start showing the animation
       setIsDisabled(true); // Disable the button
+      setMessage(""); // Clear any previous message
 
       console.log("calling from table", tableNumber);
-      callForSupport(tableNumber);
+      callForSupport(tableNumber, superClientId);
 
       // Re-enable the button after 1 minute
       setTimeout(() => {
         setIsDisabled(false);
+        setIsProcessing(false);
       }, 60000);
     } else {
       console.error("Table number not found in token");
@@ -86,10 +99,11 @@ const NotifSupport = () => {
 
   useEffect(() => {
     const socket = io(baseUrl, { auth: { token } });
+
     // Listen for call answered event
     socket.on("callAnswered", (data) => {
       if (data.tableNumber === tableNumber) {
-        handleCallAnswered(); // Stop processing and mark the call as answered
+        handleCallAnswered(); // Stop processing and show the message
       }
     });
 
@@ -101,18 +115,29 @@ const NotifSupport = () => {
   // Handle when the call is answered (could be triggered by a socket event or function call)
   const handleCallAnswered = () => {
     setIsProcessing(false); // Stop animation
+    setMessage("A waiter is on their way!"); // Show the notification
+
+    // Hide the message after 5 seconds
+    setTimeout(() => {
+      setMessage("");
+    }, 5000);
   };
 
   return (
-    // Add or remove the 'processing' or 'disabled' class based on the internal state
-    <IconContainer
-      onClick={handleCallSupportClick}
-      className={`${isProcessing ? "processing" : ""} ${
-        isDisabled ? "disabled" : ""
-      }`}
-    >
-      <StyledBasketIcon />
-    </IconContainer>
+    <>
+      {/* Show message if available */}
+      {message && <MessageContainer>{message}</MessageContainer>}
+
+      {/* Add or remove the 'processing' or 'disabled' class based on the internal state */}
+      <IconContainer
+        onClick={handleCallSupportClick}
+        className={`${isProcessing ? "processing" : ""} ${
+          isDisabled ? "disabled" : ""
+        }`}
+      >
+        <StyledBasketIcon />
+      </IconContainer>
+    </>
   );
 };
 
