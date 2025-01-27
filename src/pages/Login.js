@@ -12,10 +12,11 @@ import { baseUrl } from "helpers/BaseUrl";
 import Loading from "helpers/Loading";
 import { useNavigate } from "react-router-dom";
 import ErrorModal from "../helpers/modals/ErrorModal"; // Import your ErrorModal component
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import translations from "app/language";
 import { useLocation } from "react-router-dom";
 import { useCallback } from "react";
+import { setTableInfo } from "features/TableSlice";
 const Container = tw(
   ContainerBase
 )`min-h-screen bg-primary-900 text-white font-medium flex justify-center -m-8`;
@@ -189,7 +190,7 @@ const Login = ({
   // };
 
   // Handle QR code login based on token from URL
-
+  const dispatch = useDispatch();
   const handleQRLogin = useCallback(
     async (token) => {
       // const getUserLocation = async () => {
@@ -294,9 +295,10 @@ const Login = ({
           // }
 
           // Successful login
-          localStorage.setItem("tableToken", response.data.token);
-          localStorage.setItem("tableNumber", response.data.tableNumber);
-          localStorage.setItem("placeName", response.data.placeName);
+          const { token: newToken, tableNumber, placeName } = response.data;
+          dispatch(setTableInfo({ tableNumber, placeName }));
+          localStorage.setItem("tableToken", newToken);
+
           navigate(`/menu`);
         } else {
           setError("An error occurred, please try again.");
@@ -310,7 +312,7 @@ const Login = ({
         setIsLoading(false);
       }
     },
-    [navigate] //userLocation
+    [dispatch, navigate] //userLocation
   );
 
   useEffect(() => {

@@ -12,7 +12,7 @@ import { ReactComponent as SvgDecoratorBlob2 } from "images/svg-decorator-blob-7
 import { Container } from "components/misc/Layouts";
 import Nav from "components/hero/Nav";
 import tw from "twin.macro";
-import { SectionHeading } from "components/misc/Headings";
+import { SectionHeading, Subheading } from "components/misc/Headings";
 import Bobbles from "./bobbles";
 import NotifSupport from "components/features/NotificationSupport";
 
@@ -49,8 +49,9 @@ const DecoratorBlob2 = styled(SvgDecoratorBlob2)`
   ${tw`pointer-events-none -z-20 absolute left-0 bottom-0 h-80 w-80 opacity-15 transform -translate-x-2/3 text-primary-500`}
 `;
 const Header = tw(SectionHeading)`mt-8`;
+const SubHeader = tw(Subheading)`mt-4 text-center`;
 
-const SectionSelector = ({ heading }) => {
+const SectionSelector = ({ heading, subHeading }) => {
   const [sections, setSections] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -74,7 +75,6 @@ const SectionSelector = ({ heading }) => {
     };
 
     fetchSections();
-    
   }, [token]); // Include 'token' as a dependency
 
   const handleSectionClick = (sectionId) => {
@@ -105,6 +105,7 @@ const SectionSelector = ({ heading }) => {
       <NotifSupport />
       <Container>
         <Header>{heading}</Header>
+        <SubHeader>{subHeading}</SubHeader>
 
         <GridWrapper style={{ marginBottom: "20%" }}>
           {/* {sections?.map((section, index) => (

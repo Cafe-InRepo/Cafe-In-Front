@@ -27,7 +27,9 @@ const HighlightedText = tw.span`bg-primary-500 text-gray-100 px-4 transform -ske
 export default function App() {
   const t = useSelector((state) => state.language.language);
   const Language = translations[t];
-  const tableNumber = localStorage.getItem("tableNumber");
+  // Retrieve table info from Redux
+  const tableNumber = useSelector((state) => state.table.tableNumber);
+  const placeName = useSelector((state) => state.table.placeName);
 
   return (
     <>
@@ -80,6 +82,12 @@ export default function App() {
                 /> */}
                 <SectionSelector
                   heading={
+                    <>
+                      Welcome to:
+                      <HighlightedText>{placeName}</HighlightedText>
+                    </>
+                  }
+                  subHeading={
                     <>
                       {Language.tabnum}:
                       <HighlightedText>{tableNumber}</HighlightedText>
