@@ -257,14 +257,14 @@ export default ({ heading = "Checkout the Menu" }) => {
 
                       {card.discountPercentage > 0 ? (
                         <>
-                          {Language.price}: {" "}
+                          {Language.price}:{" "}
                           <OriginalPrice>{card.price} TND</OriginalPrice>
                           <br />
                           <DiscountedPrice>
-                            {card.price *
-                              (1 - card.discountPercentage / 100).toFixed(
-                                2
-                              )}{" "}
+                            {(
+                              card.price *
+                              (1 - card.discountPercentage / 100)
+                            ).toFixed(2)}{" "}
                             TND
                           </DiscountedPrice>{" "}
                           <DiscountBadge>
@@ -272,8 +272,9 @@ export default ({ heading = "Checkout the Menu" }) => {
                           </DiscountBadge>{" "}
                         </>
                       ) : (
-                        
-                        <CardPrice>{Language.price}: {card.price} TND</CardPrice>
+                        <CardPrice>
+                          {Language.price}: {card.price} TND
+                        </CardPrice>
                       )}
                       <CardButton
                         $isAvailable={card.available}

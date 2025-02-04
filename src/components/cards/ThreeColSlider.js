@@ -375,16 +375,14 @@ export default () => {
 
   const totalPrice = orderId
     ? Number(order?.totalPrice)
-    : items.reduce(
-        (total, item) =>
-          total + item.product.discountPercentage > 0
-            ? item.product.price *
-              (1 - item.product.discountPercentage / 100) *
-              (updatedQuantities[item.product._id] || item.quantity)
-            : item.product.price *
-              (updatedQuantities[item.product._id] || item.quantity),
-        0
-      );
+    : items.reduce((total, item) => {
+        const quantity = updatedQuantities[item.product._id] || item.quantity;
+        const price =
+          item.product.discountPercentage > 0
+            ? item.product.price * (1 - item.product.discountPercentage / 100)
+            : item.product.price;
+        return total + price * quantity;
+      }, 0);
 
   if (!displayItems || displayItems.length === 0) {
     return (
@@ -456,11 +454,10 @@ export default () => {
                           </OriginalPrice>
                           <br />
                           <DiscountedPrice>
-                            {item.product.price *
-                              (
-                                1 -
-                                item.product.discountPercentage / 100
-                              ).toFixed(2)}{" "}
+                            {(
+                              item.product.price *
+                              (1 - item.product.discountPercentage / 100)
+                            ).toFixed(2)}{" "}
                             TND
                           </DiscountedPrice>{" "}
                           <br />
