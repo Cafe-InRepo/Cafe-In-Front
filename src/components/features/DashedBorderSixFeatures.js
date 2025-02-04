@@ -81,9 +81,13 @@ const OrderList = () => {
             Authorization: `Bearer ${token}`,
           },
         });
+        // Sort orders by timestamp (most recent first)
+        const sortedOrders = response.data.sort(
+          (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+        );
 
-        setOrders(response.data);
-        console.log(response.data);
+        setOrders(sortedOrders);
+        console.log(sortedOrders);
 
         setIsLoading(false); // Set loading to false when data is fetched
       } catch (error) {
@@ -210,8 +214,12 @@ const OrderList = () => {
                     <ul>
                       {order.products.map(({ product, quantity }, index) => (
                         <li key={index}>
-                          {product?.name} : {product?.price} TND (Qty:{" "}
-                          {quantity})
+                          {product?.name} :{" "}
+                          {product.discountPercentage > 0
+                            ? product.price -
+                              (product.discountPercentage / 100) * product.price
+                            : product.price}{" "}
+                          TND (Qty: {quantity})
                         </li>
                       ))}
                     </ul>

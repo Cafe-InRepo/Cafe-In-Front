@@ -129,6 +129,9 @@ const DecoratorBlob1 = styled(SvgDecoratorBlob1)`
 const DecoratorBlob2 = styled(SvgDecoratorBlob2)`
   ${tw`pointer-events-none -z-20 absolute left-0 bottom-0 h-80 w-80 opacity-15 transform -translate-x-2/3 text-primary-500`}
 `;
+const DiscountedPrice = tw.span`text-green-600 font-bold`;
+const OriginalPrice = tw.span`line-through text-gray-500 mr-2`;
+const DiscountBadge = tw.span`ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded`;
 
 export default ({ heading = "Checkout the Menu" }) => {
   const [tabs, setTabs] = useState({});
@@ -251,8 +254,27 @@ export default ({ heading = "Checkout the Menu" }) => {
                     <CardText>
                       <CardTitle>{card.name}</CardTitle>
                       <CardContent>{card.description}</CardContent>
-                      <CardPrice>{card.price} TND</CardPrice>
 
+                      {card.discountPercentage > 0 ? (
+                        <>
+                          {Language.price}: {" "}
+                          <OriginalPrice>{card.price} TND</OriginalPrice>
+                          <br />
+                          <DiscountedPrice>
+                            {card.price *
+                              (1 - card.discountPercentage / 100).toFixed(
+                                2
+                              )}{" "}
+                            TND
+                          </DiscountedPrice>{" "}
+                          <DiscountBadge>
+                            -{card.discountPercentage}%
+                          </DiscountBadge>{" "}
+                        </>
+                      ) : (
+                        
+                        <CardPrice>{Language.price}: {card.price} TND</CardPrice>
+                      )}
                       <CardButton
                         $isAvailable={card.available}
                         disabled={!card.available}

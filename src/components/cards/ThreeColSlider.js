@@ -155,6 +155,11 @@ const CommentTextarea = styled.textarea`
   ${tw`w-full p-3 border rounded-lg text-sm leading-relaxed`}
   min-height: 100px;
 `;
+const CardPrice = tw.p`mt-4 text-xl font-bold`;
+
+const DiscountedPrice = tw.span`text-green-600 font-bold`;
+const OriginalPrice = tw.span`line-through text-gray-500 mr-2`;
+const DiscountBadge = tw.span`ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded`;
 
 export default () => {
   const [sliderRef, setSliderRef] = useState(null);
@@ -372,9 +377,12 @@ export default () => {
     ? Number(order?.totalPrice)
     : items.reduce(
         (total, item) =>
-          total +
-          item.product.price *
-            (updatedQuantities[item.product._id] || item.quantity),
+          total + item.product.discountPercentage > 0
+            ? item.product.price *
+              (1 - item.product.discountPercentage / 100) *
+              (updatedQuantities[item.product._id] || item.quantity)
+            : item.product.price *
+              (updatedQuantities[item.product._id] || item.quantity),
         0
       );
 
@@ -440,7 +448,31 @@ export default () => {
                   <SecondaryInfoContainer>
                     <Description>{item.product.description}</Description>
                     <IconWithText>
-                      {Language.price}: {item.product.price} TND
+                      {item.product.discountPercentage > 0 ? (
+                        <>
+                          {Language.price}:{" "}
+                          <OriginalPrice>
+                            {item.product.price} TND
+                          </OriginalPrice>
+                          <br />
+                          <DiscountedPrice>
+                            {item.product.price *
+                              (
+                                1 -
+                                item.product.discountPercentage / 100
+                              ).toFixed(2)}{" "}
+                            TND
+                          </DiscountedPrice>{" "}
+                          <br />
+                          <DiscountBadge>
+                            -{item.product.discountPercentage}%
+                          </DiscountBadge>{" "}
+                        </>
+                      ) : (
+                        <CardPrice>
+                          {Language.price}: {item.product.price} TND
+                        </CardPrice>
+                      )}
                     </IconWithText>
                   </SecondaryInfoContainer>
                 </TextInfo>

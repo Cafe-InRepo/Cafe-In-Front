@@ -31,7 +31,6 @@ const BasketIcon = () => {
   const items = useSelector((state) => state.basket.items);
 
   useEffect(() => {
-    console.log("Basket items:", items); // Debugging log
   }, [items]);
 
   if (items.length === 0) {
