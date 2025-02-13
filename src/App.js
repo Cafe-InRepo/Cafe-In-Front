@@ -83,7 +83,7 @@ export default function App() {
                 <SectionSelector
                   heading={
                     <>
-                      Welcome to:
+                      {Language.welcomeTo}:
                       <HighlightedText>{placeName}</HighlightedText>
                     </>
                   }

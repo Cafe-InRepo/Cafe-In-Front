@@ -492,19 +492,19 @@ export default () => {
           </CommentContainer>
 
           <PlaceOrderButton onClick={handlePlaceOrder}>
-            {orderId ? "Update the Order" : "Place the Order"}
+            {orderId ? Language.updateOrder : Language.placeOrder}
             <ArrowRightIcon />
           </PlaceOrderButton>
           <TotalPriceContainer>
             {Language.totalPrice}: {totalPrice.toFixed(2)} TND
           </TotalPriceContainer>
           <PlaceOrderButton onClick={handlePlaceOrder}>
-            {orderId ? "Update the Order" : "Place the Order"}
+            {orderId ? Language.updateOrder : Language.placeOrder}
             <ArrowRightIcon />
           </PlaceOrderButton>
           <BackToMenuButton as={Link} to="/menu">
             <ArrowLeftIcon />
-            Back to Menu
+            {Language.backToMenu}
           </BackToMenuButton>
         </Content>
       </Container>

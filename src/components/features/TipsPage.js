@@ -1,8 +1,10 @@
+import translations from "app/language";
 import axios from "axios";
 import { baseUrl } from "helpers/BaseUrl";
 import { GetToken } from "helpers/GetToken";
 import Loading from "helpers/Loading";
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
 import styled from "styled-components";
 import tw from "twin.macro";
@@ -30,6 +32,8 @@ const TipsPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [tipped, setTipped] = useState(false);
 
+  const t = useSelector((state) => state.language.language);
+  const Language = translations[t];
   const handleTipSelect = (amount) => {
     setSelectedTip(amount);
     setCustomTip(""); // Clear custom input when a preset tip is selected
@@ -65,8 +69,8 @@ const TipsPage = () => {
     return (
       <Container>
         <Card>
-          <Title>Thank you for your tip!</Title>
-          <OrdersLink to="/orders">Go to my orders</OrdersLink>
+          <Title>{Language.thankYouForYourTip}!</Title>
+          <OrdersLink to="/orders">{Language.goToMyOrders}</OrdersLink>
         </Card>
       </Container>
     );
@@ -81,7 +85,7 @@ const TipsPage = () => {
   return (
     <Container>
       <Card>
-        <Title>Choose Your Tip</Title>
+        <Title>{Language.chooseYourTip}</Title>
         <TipsList>
           {[5, 10, 15, 20].map((amount) => (
             <TipButton
@@ -95,12 +99,12 @@ const TipsPage = () => {
         </TipsList>
         <CustomTipInput
           type="number"
-          placeholder="Enter custom tip amount"
+          placeholder={Language.enterCustomTipAmount}
           value={customTip}
           onChange={handleCustomTipChange}
         />
         <SubmitButton onClick={handleSubmit} disabled={isSubmitDisabled}>
-          Submit Tip
+          {Language.submitTip}
         </SubmitButton>
       </Card>
     </Container>

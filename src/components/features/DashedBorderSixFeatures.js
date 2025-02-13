@@ -185,21 +185,28 @@ const OrderList = () => {
                 {order.status === "completed" && <CompletedIcon />}
                 <span className="textContainer">
                   <span className="title">
-                    {Language.status}: {order.status}
+                    {Language.status}:{" "}
+                    {order.status === "pending"
+                      ? Language.pending
+                      : order.status === "preparing"
+                      ? Language.preparing
+                      : order.status === "completed"
+                      ? Language.completed
+                      : Language.cancelled}
                   </span>
                   <div className="description">
                     <div>
-                      <span>Price:</span>{" "}
+                      <span>{Language.price}:</span>{" "}
                       <b>{Number(order.totalPrice).toFixed(2)} TND</b>
                     </div>
                     {order.tips && (
                       <div>
-                        <span>Tips:</span>{" "}
+                        <span>{Language.tip}:</span>{" "}
                         <b>{Number(order.tips).toFixed(1)} TND</b>
                       </div>
                     )}
                     <div>
-                      <span>Total:</span>{" "}
+                      <span>{Language.total}:</span>{" "}
                       <b>
                         {(
                           Number(order.totalPrice) + (Number(order.tips) || 0)
@@ -219,7 +226,7 @@ const OrderList = () => {
                             ? product.price -
                               (product.discountPercentage / 100) * product.price
                             : product.price}{" "}
-                          TND (Qty: {quantity})
+                          TND ({Language.qty}: {quantity})
                         </li>
                       ))}
                     </ul>
@@ -238,7 +245,7 @@ const OrderList = () => {
                         onClick={() => handleTips(order._id)}
                         disabled={order.tips}
                       >
-                        {order.tips ? "Tipped" : "Tip"}
+                        {order.tips ? Language.tipped : Language.tip}
                       </PrimaryButton>
                     </>
                   ) : (
