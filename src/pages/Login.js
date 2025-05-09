@@ -3,7 +3,7 @@ import AnimationRevealPage from "helpers/AnimationRevealPage.js";
 import { Container as ContainerBase } from "components/misc/Layouts";
 import tw from "twin.macro";
 import styled from "styled-components";
-import { css } from "styled-components/macro";
+//import { css } from "styled-components/macro";
 import qrIllustration from "images/qr-scan-illustration.png"; // Add this new image
 import logo from "images/logo-.png";
 import { ReactComponent as ScanIcon } from "feather-icons/dist/icons/camera.svg";
