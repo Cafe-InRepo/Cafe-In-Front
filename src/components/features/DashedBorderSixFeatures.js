@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import tw from "twin.macro";
@@ -75,6 +75,20 @@ const OrderList = () => {
 
   const navigate = useNavigate();
   const token = GetToken(); // Retrieve the token
+  const ringtoneRef = useRef(null); // Using ref for ringtone
+
+  // Memoized playRingtone function
+
+  const playRingtone = useCallback(() => {
+    if (ringtoneRef.current) {
+      ringtoneRef.current.pause();
+      ringtoneRef.current.currentTime = 0;
+    }
+    const audio = new Audio("/orderChange.m4a");
+    audio.loop = false;
+    audio.play();
+    ringtoneRef.current = audio;
+  }, []);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -84,13 +98,16 @@ const OrderList = () => {
             Authorization: `Bearer ${token}`,
           },
         });
+
         // Sort orders by timestamp (most recent first)
         const sortedOrders = response.data.sort(
           (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
         );
 
         setOrders(sortedOrders);
-        const totals = orders.reduce(
+
+        // Calculate totals from the freshly fetched data
+        const totals = sortedOrders.reduce(
           (acc, order) => {
             const price = Number(order.totalPrice);
             const tips = Number(order.tips) || 0;
@@ -106,17 +123,16 @@ const OrderList = () => {
         setTotalWithoutTips(totals.withoutTips.toFixed(2));
         setTotalWithTips(totals.withTips.toFixed(2));
 
-        setIsLoading(false); // Set loading to false when data is fetched
+        setIsLoading(false);
       } catch (error) {
-        if (error.response.status === 404) {
+        if (error.response?.status === 404) {
           setOrders([]);
-          setIsLoading(false);
         } else {
           console.error("Error fetching orders:", error);
           setErrorMessage("Error fetching orders.");
           setShowErrorModal(true);
-          setIsLoading(false); // Set loading to false even if there is an error
         }
+        setIsLoading(false);
       }
     };
 
@@ -133,22 +149,13 @@ const OrderList = () => {
 
     return () => {
       socket.disconnect();
+      if (ringtoneRef.current) {
+        ringtoneRef.current.pause();
+        ringtoneRef.current = null;
+      }
     };
-  }, [token]);
-  const [ringtone, setRingtone] = useState(null);
-  const playRingtone = () => {
-    stopRingtone();
-    const audio = new Audio("/orderChange.m4a");
-    audio.loop = false;
-    audio.play();
-    setRingtone(audio);
-  };
-  const stopRingtone = () => {
-    if (ringtone) {
-      ringtone.pause();
-      ringtone.currentTime = 0;
-    }
-  };
+  }, [token, playRingtone]); // Removed 'orders' dependency
+
   const handleModify = async (orderId) => {
     navigate(`/order/${orderId}`);
   };
