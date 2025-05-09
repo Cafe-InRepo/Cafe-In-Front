@@ -70,6 +70,9 @@ const OrderList = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [orderIdToDelete, setOrderIdToDelete] = useState(null);
   const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const [totalWithoutTips, setTotalWithoutTips] = useState(0);
+  const [totalWithTips, setTotalWithTips] = useState(0);
+
   const navigate = useNavigate();
   const token = GetToken(); // Retrieve the token
 
@@ -87,7 +90,21 @@ const OrderList = () => {
         );
 
         setOrders(sortedOrders);
-        console.log(sortedOrders);
+        const totals = orders.reduce(
+          (acc, order) => {
+            const price = Number(order.totalPrice);
+            const tips = Number(order.tips) || 0;
+
+            acc.withoutTips += price;
+            acc.withTips += price + tips;
+
+            return acc;
+          },
+          { withoutTips: 0, withTips: 0 }
+        );
+
+        setTotalWithoutTips(totals.withoutTips.toFixed(2));
+        setTotalWithTips(totals.withTips.toFixed(2));
 
         setIsLoading(false); // Set loading to false when data is fetched
       } catch (error) {
@@ -111,13 +128,27 @@ const OrderList = () => {
 
     socket.on("orderUpdated", () => {
       fetchOrders();
+      playRingtone();
     });
 
     return () => {
       socket.disconnect();
     };
   }, [token]);
-
+  const [ringtone, setRingtone] = useState(null);
+  const playRingtone = () => {
+    stopRingtone();
+    const audio = new Audio("/orderChange.m4a");
+    audio.loop = false;
+    audio.play();
+    setRingtone(audio);
+  };
+  const stopRingtone = () => {
+    if (ringtone) {
+      ringtone.pause();
+      ringtone.currentTime = 0;
+    }
+  };
   const handleModify = async (orderId) => {
     navigate(`/order/${orderId}`);
   };
@@ -268,6 +299,15 @@ const OrderList = () => {
               </Card>
             </Column>
           ))}
+          <br></br>
+          <div className="mb-4 text-lg font-semibold text-gray-800">
+            <div>
+              {Language.totalWithoutTips}: {totalWithoutTips} TND
+            </div>
+            <div>
+              {Language.totalWithTips}: {totalWithTips} TND
+            </div>
+          </div>
           <Column>
             <Card onClick={handleAddNewOrder}>
               <span className="textContainer">

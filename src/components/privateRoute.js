@@ -1,9 +1,10 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { GetToken } from "helpers/GetToken";
 
 const PrivateRoute = ({ children }) => {
-  const token = localStorage.getItem("tableToken");
+  const token = GetToken();
 
   if (!token) {
     return <Navigate to="/login" />;
