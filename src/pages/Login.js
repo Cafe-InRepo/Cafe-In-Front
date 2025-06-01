@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import AnimationRevealPage from "helpers/AnimationRevealPage.js";
 import { Container as ContainerBase } from "components/misc/Layouts";
 import tw from "twin.macro";
@@ -9,16 +9,14 @@ import { ReactComponent as ScanIcon } from "feather-icons/dist/icons/camera.svg"
 import axios from "axios";
 import { baseUrl } from "helpers/BaseUrl";
 import Loading from "helpers/Loading";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import ErrorModal from "../helpers/modals/ErrorModal";
 import { useDispatch, useSelector } from "react-redux";
 import translations from "app/language";
-import { useLocation } from "react-router-dom";
-import { useCallback } from "react";
 import { setTableInfo } from "features/TableSlice";
 import { TokenManager } from "../utils/TokenManager";
 
-// Updated container styles for QR rescan page
+// UI components (styled)
 const Container = tw(
   ContainerBase
 )`min-h-screen bg-gradient-to-b from-primary-500 to-primary-700 text-white font-medium flex justify-center -m-8`;
@@ -38,155 +36,146 @@ const RescanButton = styled.button`
 `;
 const HelpLink = tw.a`text-sm text-primary-500 hover:underline mt-4`;
 
+// Helper function for clear error messages
+const getFriendlyErrorMessage = (error) => {
+  if (!error) return "Une erreur inconnue est survenue.";
+  if (typeof error === "string") return error;
+
+  if (error.message) {
+    if (error.message.includes("Network Error"))
+      return "Erreur réseau : vérifiez votre connexion Internet.";
+    if (error.message.includes("timeout"))
+      return "La requête a expiré. Réessayez.";
+  }
+
+  switch (error.code) {
+    case error.PERMISSION_DENIED:
+      return "Accès à la localisation refusé. Activez-le dans les paramètres du navigateur.";
+    case error.POSITION_UNAVAILABLE:
+      return "Position indisponible. Essayez à l'extérieur.";
+    case error.TIMEOUT:
+      return "Temps d'attente dépassé pour la localisation.";
+    default:
+      return "Erreur inattendue. Veuillez réessayer.";
+  }
+};
+
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [userLocation, setUserLocation] = useState(null);
+
   const navigate = useNavigate();
   const location = useLocation();
   const t = useSelector((state) => state.language.language);
   const Language = translations[t];
   const dispatch = useDispatch();
-  const [userLocation, setUserLocation] = useState(null);
 
-  // Function to get user's location
+  // Get geolocation with permission handling
   const getUserLocation = async () => {
     try {
       if (!navigator.geolocation) {
-        throw new Error("Geolocation is not supported by your browser.");
+        throw new Error("Votre navigateur ne supporte pas la géolocalisation.");
       }
 
       return new Promise((resolve, reject) => {
         if ("permissions" in navigator && navigator.permissions.query) {
           navigator.permissions
             .query({ name: "geolocation" })
-            .then((permissionStatus) => {
-              if (
-                permissionStatus.state === "granted" ||
-                permissionStatus.state === "prompt"
-              ) {
+            .then((status) => {
+              if (status.state === "granted" || status.state === "prompt") {
                 navigator.geolocation.getCurrentPosition(
-                  (position) => {
-                    const { latitude, longitude } = position.coords;
+                  (pos) => {
+                    const { latitude, longitude } = pos.coords;
                     resolve({ lat: latitude, lon: longitude });
                   },
-                  (error) => {
-                    reject(
-                      error.code === error.PERMISSION_DENIED
-                        ? "Location permission denied. Please enable location services."
-                        : "Unable to retrieve your location."
-                    );
-                  },
+                  (err) => reject(err),
                   { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
                 );
-              } else if (permissionStatus.state === "denied") {
-                reject(
-                  "Location access is denied. Please enable location services in your browser settings."
-                );
+              } else {
+                reject({ code: 1 }); // PERMISSION_DENIED
               }
-
-              permissionStatus.onchange = () => {
-                console.log(
-                  "Permission state changed to:",
-                  permissionStatus.state
-                );
-              };
             });
         } else {
-          // Fallback for browsers without Permissions API
+          // Fallback
           navigator.geolocation.getCurrentPosition(
-            (position) => {
-              const { latitude, longitude } = position.coords;
+            (pos) => {
+              const { latitude, longitude } = pos.coords;
               resolve({ lat: latitude, lon: longitude });
             },
-            (error) => {
-              reject(
-                error.code === error.PERMISSION_DENIED
-                  ? "Location permission denied. Please enable location services."
-                  : "Unable to retrieve your location."
-              );
-            },
+            (err) => reject(err),
             { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
           );
         }
       });
     } catch (error) {
-      console.error("Error accessing geolocation:", error);
-      throw new Error(
-        error.message ||
-          "An unexpected error occurred while accessing location."
-      );
+      throw new Error(error.message || "Erreur d'accès à la géolocalisation.");
     }
   };
 
-  // Function to calculate distance using Haversine formula
+  // Distance calculator (Haversine) – DO NOT modify this line:
   const calculateDistance = (loc1, loc2) => {
     const toRadians = (degree) => (degree * Math.PI) / 180;
-    const R = 6371e3; // Radius of Earth in meters
+    const R = 6371e3; // meters
     const φ1 = toRadians(loc1.lat);
     const φ2 = toRadians(loc2.lat);
     const Δφ = toRadians(loc2.lat - loc1.lat);
-    const Δλ = toRadians(loc2.long - loc1.lon);
+    const Δλ = toRadians(loc2.long - loc1.lon); // DO NOT change
 
     const a =
-      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+      Math.sin(Δφ / 2) ** 2 +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    return R * c; // Distance in meters
+    return R * c;
   };
 
-  // Retry function to allow user to try enabling location services again
+  // Retry logic for rescan button
   const retryLogin = async () => {
-    setShowModal(false); // Close the modal
+    setShowModal(false);
     const query = new URLSearchParams(location.search);
     const token = query.get("token");
-
-    if (token) {
-      await handleQRLogin(token);
-    }
+    if (token) await handleQRLogin(token);
   };
 
+  // QR Token login logic
   const handleQRLogin = useCallback(
     async (token) => {
       setError("");
       setIsLoading(true);
 
       try {
-        // Ensure location is available
-        const location = userLocation || (await getUserLocation());
-        setUserLocation(location);
+        const currentLocation = userLocation || (await getUserLocation());
+        setUserLocation(currentLocation);
 
-        // Proceed with QR login
         const response = await axios.post(`${baseUrl}/auth/login-qr`, {
           token,
         });
 
         if (response.status === 200) {
-          // Check distance
           const distance = calculateDistance(
-            location,
+            currentLocation,
             response.data.placeLocation
           );
 
           if (distance > response.data.distance) {
-            setError("You are too far from the coffee shop to log in.");
+            setError("Vous êtes trop loin du restaurant pour vous connecter.");
             setShowModal(true);
             return;
           }
 
-          // Successful login
           const { token: newToken, tableNumber, placeName } = response.data;
           dispatch(setTableInfo({ tableNumber, placeName }));
           TokenManager.setToken(newToken);
           navigate("/menu");
         } else {
-          setError("An error occurred, please try again.");
+          setError("Erreur inattendue, veuillez réessayer.");
           setShowModal(true);
         }
       } catch (error) {
-        console.error("Error logging in:", error.message);
-        setError(error.message || "Login failed");
+        console.error("Login error:", error);
+        setError(getFriendlyErrorMessage(error));
         setShowModal(true);
       } finally {
         setIsLoading(false);
@@ -195,9 +184,7 @@ const Login = () => {
     [dispatch, navigate, userLocation]
   );
 
-  const closeModal = () => {
-    setShowModal(false);
-  };
+  const closeModal = () => setShowModal(false);
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
@@ -208,9 +195,7 @@ const Login = () => {
     }
   }, [location.search, handleQRLogin]);
 
-  if (isLoading) {
-    return <Loading />;
-  }
+  if (isLoading) return <Loading />;
 
   return (
     <AnimationRevealPage>
@@ -230,23 +215,21 @@ const Login = () => {
 
             <MainContent>
               <QRIllustration src={qrIllustration} alt="Scan QR Code" />
-
               <Heading>
-                {Language.qrRescanTitle || "Please Rescan Your QR Code"}
+                {Language.qrRescanTitle || "Veuillez rescanner votre QR Code"}
               </Heading>
-
               <Description>
                 {Language.qrRescanDescription ||
-                  "Hold your device steady and align the QR code within the frame to continue"}
+                  "Tenez votre appareil droit et alignez le QR Code dans le cadre pour continuer."}
               </Description>
 
               <RescanButton onClick={retryLogin}>
                 <ScanIcon className="icon" />
-                {Language.rescanButton || "Rescan QR Code"}
+                {Language.rescanButton || "Rescanner le QR Code"}
               </RescanButton>
 
               <HelpLink href="#">
-                {Language.needHelp || "Need help scanning?"}
+                {Language.needHelp || "Besoin d'aide ?"}
               </HelpLink>
             </MainContent>
           </MainContainer>
