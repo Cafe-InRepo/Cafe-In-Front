@@ -154,7 +154,7 @@ const Login = () => {
 
         if (response.status === 200) {
           alert(currentLocation.lat);
-          alert(currentLocation.long);
+          alert(currentLocation.lon);
           const distance = calculateDistance(
             currentLocation,
             response.data.placeLocation
