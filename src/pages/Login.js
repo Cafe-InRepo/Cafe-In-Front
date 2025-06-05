@@ -121,8 +121,7 @@ const Login = () => {
     const φ1 = toRadians(loc1.lat);
     const φ2 = toRadians(loc2.lat);
     const Δφ = toRadians(loc2.lat - loc1.lat);
-    const Δλ = toRadians(loc2.long - loc1.lon); // DO NOT change
-
+    const Δλ = toRadians(loc2.long - loc1.lon);
     const a =
       Math.sin(Δφ / 2) ** 2 +
       Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
@@ -158,7 +157,8 @@ const Login = () => {
             currentLocation,
             response.data.placeLocation
           );
-
+          alert("calculated distance", distance);
+          alert("saved distance", response.data.distance);
           if (distance > response.data.distance) {
             setError("Vous êtes trop loin du restaurant pour vous connecter.");
             setShowModal(true);
