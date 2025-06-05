@@ -153,6 +153,8 @@ const Login = () => {
         });
 
         if (response.status === 200) {
+          alert(currentLocation.lat);
+          alert(currentLocation.long);
           const distance = calculateDistance(
             currentLocation,
             response.data.placeLocation
