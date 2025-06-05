@@ -64,7 +64,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [userLocation, setUserLocation] = useState(null);
+  //const [userLocation, setUserLocation] = useState(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -72,52 +72,69 @@ const Login = () => {
   const Language = translations[t];
   const dispatch = useDispatch();
 
-  // Get geolocation with permission handling
-  const getUserLocation = async () => {
-    try {
+  const LOCATION_ACCURACY_THRESHOLD = 50; // meters
+  //const MAX_ALLOWED_DISTANCE = 100; // meters (adjust based on coffee shop size)
+
+  const getAccurateLocation = async () => {
+    return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
-        throw new Error("Votre navigateur ne supporte pas la géolocalisation.");
+        reject(new Error("Geolocation not supported"));
+        return;
       }
 
-      return new Promise((resolve, reject) => {
-        if ("permissions" in navigator && navigator.permissions.query) {
-          navigator.permissions
-            .query({ name: "geolocation" })
-            .then((status) => {
-              if (status.state === "granted" || status.state === "prompt") {
-                navigator.geolocation.getCurrentPosition(
-                  (pos) => {
-                    const { latitude, longitude } = pos.coords;
-                    resolve({ lat: latitude, lon: longitude });
-                  },
-                  (err) => reject(err),
-                  { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-                );
-              } else {
-                reject({ code: 1 }); // PERMISSION_DENIED
-              }
+      let bestResult = null;
+      let attempts = 0;
+      const maxAttempts = 5;
+      const watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          attempts++;
+          const { latitude, longitude, accuracy } = position.coords;
+
+          // Accept if accuracy is good enough
+          if (accuracy <= LOCATION_ACCURACY_THRESHOLD) {
+            navigator.geolocation.clearWatch(watchId);
+            resolve({
+              lat: latitude,
+              lon: longitude,
+              accuracy: accuracy,
             });
-        } else {
-          // Fallback
-          navigator.geolocation.getCurrentPosition(
-            (pos) => {
-              const { latitude, longitude } = pos.coords;
-              resolve({ lat: latitude, lon: longitude });
-            },
-            (err) => reject(err),
-            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-          );
+            return;
+          }
+
+          // Track best result so far
+          if (!bestResult || accuracy < bestResult.accuracy) {
+            bestResult = {
+              lat: latitude,
+              lon: longitude,
+              accuracy: accuracy,
+            };
+          }
+
+          // After max attempts, return best result
+          if (attempts >= maxAttempts) {
+            navigator.geolocation.clearWatch(watchId);
+            if (bestResult) {
+              resolve(bestResult);
+            } else {
+              reject(new Error("Could not get accurate location"));
+            }
+          }
+        },
+        (error) => {
+          navigator.geolocation.clearWatch(watchId);
+          reject(error);
+        },
+        {
+          enableHighAccuracy: true,
+          maximumAge: 0,
+          timeout: 10000,
         }
-      });
-    } catch (error) {
-      throw new Error(error.message || "Erreur d'accès à la géolocalisation.");
-    }
+      );
+    });
   };
 
-  // Distance calculator (Haversine) – DO NOT modify this line:
+  // Improved distance calculation
   const calculateDistance = (loc1, loc2) => {
-    const toRadians = (degree) => (parseFloat(degree) * Math.PI) / 180;
-
     if (
       !loc1 ||
       !loc2 ||
@@ -126,24 +143,21 @@ const Login = () => {
       loc2.lat == null ||
       loc2.long == null
     ) {
-      console.warn(
-        "Missing latitude or longitude data for distance calculation."
-      );
-      return null; // or throw an error if you prefer to handle it explicitly
+      return null;
     }
 
     const R = 6371e3; // Earth radius in meters
-    const φ1 = toRadians(loc1.lat);
-    const φ2 = toRadians(loc2.lat);
-    const Δφ = toRadians(loc2.lat - loc1.lat);
-    const Δλ = toRadians(loc2.long - loc1.lon);
+    const φ1 = (loc1.lat * Math.PI) / 180;
+    const φ2 = (loc2.lat * Math.PI) / 180;
+    const Δφ = ((loc2.lat - loc1.lat) * Math.PI) / 180;
+    const Δλ = ((loc2.lon - loc1.lon) * Math.PI) / 180;
 
     const a =
-      Math.sin(Δφ / 2) ** 2 +
-      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    return R * c; // distance in meters
+    return R * c;
   };
 
   // Retry logic for rescan button
@@ -161,8 +175,9 @@ const Login = () => {
       setIsLoading(true);
 
       try {
-        const currentLocation = userLocation || (await getUserLocation());
-        setUserLocation(currentLocation);
+        const currentLocation = await getAccurateLocation();
+
+        //setUserLocation(currentLocation);
 
         const response = await axios.post(`${baseUrl}/auth/login-qr`, {
           token,
@@ -179,11 +194,24 @@ const Login = () => {
           alert(distance);
           alert("saved distance");
           alert(response.data.distance);
-          if (distance > response.data.distance) {
-            setError("Vous êtes trop loin du restaurant pour vous connecter.");
-            setShowModal(true);
-            return;
+          if (distance === null) {
+            throw new Error("Missing location data");
           }
+
+          // Check if accuracy is good enough
+          if (currentLocation.accuracy > LOCATION_ACCURACY_THRESHOLD) {
+            throw new Error("Location reading not precise enough");
+          }
+
+          // Check distance with buffer for GPS inaccuracy
+          if (distance > response.data.distance + currentLocation.accuracy) {
+            throw new Error("You are too far from the coffee shop");
+          }
+          // if (distance > response.data.distance) {
+          //   setError("Vous êtes trop loin du restaurant pour vous connecter.");
+          //   setShowModal(true);
+          //   return;
+          // }
 
           const { token: newToken, tableNumber, placeName } = response.data;
           dispatch(setTableInfo({ tableNumber, placeName }));
@@ -201,7 +229,7 @@ const Login = () => {
         setIsLoading(false);
       }
     },
-    [dispatch, navigate, userLocation]
+    [dispatch, navigate]
   );
 
   const closeModal = () => setShowModal(false);
