@@ -157,8 +157,8 @@ const Login = () => {
             currentLocation,
             response.data.placeLocation
           );
-          alert("calculated distance", distance);
-          alert("saved distance", response.data.distance);
+          alert("calculated distance" + distance);
+          alert("saved distance" + response.data.distance);
           if (distance > response.data.distance) {
             setError("Vous êtes trop loin du restaurant pour vous connecter.");
             setShowModal(true);
