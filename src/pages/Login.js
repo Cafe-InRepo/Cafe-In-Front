@@ -397,7 +397,7 @@ const Login = () => {
             const φ1 = (loc1.lat * Math.PI) / 180;
             const φ2 = (loc2.lat * Math.PI) / 180;
             const Δφ = ((loc2.lat - loc1.lat) * Math.PI) / 180;
-            const Δλ = ((loc2.lon - loc1.lon) * Math.PI) / 180;
+            const Δλ = ((loc2.long - loc1.lon) * Math.PI) / 180;
 
             const a =
               Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
