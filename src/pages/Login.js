@@ -116,18 +116,34 @@ const Login = () => {
 
   // Distance calculator (Haversine) – DO NOT modify this line:
   const calculateDistance = (loc1, loc2) => {
-    const toRadians = (degree) => (degree * Math.PI) / 180;
-    const R = 6371e3; // meters
+    const toRadians = (degree) => (parseFloat(degree) * Math.PI) / 180;
+
+    if (
+      !loc1 ||
+      !loc2 ||
+      loc1.lat == null ||
+      loc1.lon == null ||
+      loc2.lat == null ||
+      loc2.long == null
+    ) {
+      console.warn(
+        "Missing latitude or longitude data for distance calculation."
+      );
+      return null; // or throw an error if you prefer to handle it explicitly
+    }
+
+    const R = 6371e3; // Earth radius in meters
     const φ1 = toRadians(loc1.lat);
     const φ2 = toRadians(loc2.lat);
     const Δφ = toRadians(loc2.lat - loc1.lat);
     const Δλ = toRadians(loc2.long - loc1.lon);
+
     const a =
       Math.sin(Δφ / 2) ** 2 +
       Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    return R * c;
+    return R * c; // distance in meters
   };
 
   // Retry logic for rescan button
@@ -155,10 +171,16 @@ const Login = () => {
         if (response.status === 200) {
           alert(currentLocation.lat);
           alert(currentLocation.lon);
-          const distance = calculateDistance(
-            currentLocation,
-            response.data.placeLocation
-          );
+          const savedLocation = response.data.placeLocation;
+
+          const distance = calculateDistance(currentLocation, savedLocation);
+          if (distance === null) {
+            setError(
+              "Données de localisation manquantes. Impossible de vérifier la distance."
+            );
+            setShowModal(true);
+            return;
+          }
           alert("calculated distance");
           alert(distance);
           alert("saved distance");
