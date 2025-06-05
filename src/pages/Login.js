@@ -413,7 +413,7 @@ const Login = () => {
           };
 
           const distance = calculateDistance(currentLocation, savedLocation);
-
+          alert(distance);
           console.log("Distance calculation:", {
             currentLocation,
             savedLocation,
