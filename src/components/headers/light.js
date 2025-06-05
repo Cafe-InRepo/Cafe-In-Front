@@ -6,7 +6,7 @@ import { css } from "styled-components/macro"; //eslint-disable-line
 
 import useAnimatedNavToggler from "../../helpers/useAnimatedNavToggler.js";
 
-import logo from "../../images/SmallLogo.png";
+import logo from "../../images/logo-.png";
 import { ReactComponent as MenuIcon } from "feather-icons/dist/icons/menu.svg";
 import { ReactComponent as CloseIcon } from "feather-icons/dist/icons/x.svg";
 import LanguageSelector from "helpers/LanguageSelector.js";
@@ -78,6 +78,8 @@ export default ({
    * If you manipulate links here, all the styling on the links is already done for you. If you pass links yourself though, you are responsible for styling the links or use the helper styled components that are defined here (NavLink)
    */
   const placeName = localStorage.getItem("placeName");
+  const placeLogo = localStorage.getItem("placeLogo");
+
   const defaultLinks = [
     <NavLinks key={1}>
       <NavLink href="/#">About</NavLink>
@@ -100,7 +102,7 @@ export default ({
   const defaultLogoLink = (
     <>
       <LogoLink href="/">
-        <img src={logo} alt="logo" />
+        <img src={placeLogo ? placeLogo : logo} alt="logo" />
         {placeName === undefined ? { placeName } : "Order Craft"}
       </LogoLink>
 

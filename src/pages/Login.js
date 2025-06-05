@@ -213,8 +213,13 @@ const Login = () => {
           //   return;
           // }
 
-          const { token: newToken, tableNumber, placeName } = response.data;
-          dispatch(setTableInfo({ tableNumber, placeName }));
+          const {
+            token: newToken,
+            tableNumber,
+            placeName,
+            placeLogo,
+          } = response.data;
+          dispatch(setTableInfo({ tableNumber, placeName, placeLogo }));
           TokenManager.setToken(newToken);
           navigate("/menu");
         } else {
